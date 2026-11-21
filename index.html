@@ -84,12 +84,11 @@
                 const appName = 'hr-training-' + Date.now();
                 const app = initializeApp(configObj, appName);
 
-                // Attempt anonymous auth safely; if not enabled in Firebase Console, continue to Firestore directly
                 try {
                     const auth = getAuth(app);
                     await signInAnonymously(auth);
                 } catch (authErr) {
-                    console.warn('Firebase Anonymous Auth skipped (not enabled in console):', authErr.code || authErr.message);
+                    console.warn('Firebase Anonymous Auth skipped:', authErr.code || authErr.message);
                 }
 
                 const db = getFirestore(app);
@@ -162,29 +161,29 @@
                 <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary-600 to-teal-500 text-white flex items-center justify-center text-3xl shadow-lg">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
-                <h2 id="login-title" class="text-2xl font-extrabold text-slate-900">تسجيل دخول فريق التدريب HR</h2>
-                <p id="login-subtitle" class="text-xs text-slate-500">أدخل بيانات الدخول للوصول إلى لوحة التحكم وقاعدة بيانات المتدربين</p>
+                <h2 id="login-title" class="text-2xl font-extrabold text-slate-900">تسجيل دخول أكاديمية التدريب</h2>
+                <p id="login-subtitle" class="text-xs text-slate-500">أدخل اسم المستخدم وكلمة المرور الخاصة بحسابك للوصول للنظام</p>
             </div>
 
             <form onsubmit="handleHrLogin(event)" class="space-y-4">
                 <div>
-                    <label id="login-user-lbl" class="block text-xs font-bold text-slate-700 mb-1.5">اسم المستخدم</label>
+                    <label id="login-user-lbl" class="block text-xs font-bold text-slate-700 mb-1.5">اسم المستخدم (Username)</label>
                     <input type="text" id="login-username" required placeholder="admin" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
                 <div>
-                    <label id="login-pass-lbl" class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور</label>
+                    <label id="login-pass-lbl" class="block text-xs font-bold text-slate-700 mb-1.5">كلمة المرور (Password)</label>
                     <input type="password" id="login-password" required placeholder="••••••" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
                 <div id="login-error-msg" class="hidden text-xs font-bold text-rose-600 bg-rose-50 p-3 rounded-xl border border-rose-200 text-center"></div>
                 <button type="submit" id="login-submit-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 rounded-xl shadow-md transition">
-                    دخول النظام
+                    تسجيل الدخول
                 </button>
             </form>
-            <p id="login-hint-text" class="text-[11px] text-center text-slate-400">البيانات الافتراضية: admin / 123456 (يمكنك تغييرها من إعدادات السحابة والأمان)</p>
+            <p id="login-hint-text" class="text-[11px] text-center text-slate-400">حساب الأدمن الافتراضي: admin / 123456 (يمكن للأدمن تغييره من شاشة المستخدمين والصلاحيات)</p>
         </div>
     </div>
 
-    <!-- Cloud Sync & Security Settings Modal -->
+    <!-- Cloud Sync Modal (Super Admin Only) -->
     <div id="cloud-settings-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 my-8">
             <div class="flex items-start justify-between border-b border-slate-100 pb-4">
@@ -193,8 +192,8 @@
                         <i class="fa-solid fa-cloud-arrow-up"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-extrabold text-slate-800">إعدادات الربط السحابي (Firebase) والأمان</h3>
-                        <p class="text-xs text-slate-500">مزامنة فورية بين جميع الأجهزة + حماية لوحة التحكم بكلمة مرور</p>
+                        <h3 class="text-lg font-extrabold text-slate-800">إعدادات الربط السحابي (Firebase Cloud)</h3>
+                        <p class="text-xs text-slate-500">مزامنة فورية لجميع البيانات والمستخدمين والصلاحيات عبر السحابة</p>
                     </div>
                 </div>
                 <button onclick="closeCloudSettingsModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg">
@@ -202,53 +201,18 @@
                 </button>
             </div>
 
-            <!-- Firebase Config Section -->
             <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <label class="text-xs font-extrabold text-slate-800">1. كود إعدادات مشروع Firebase (firebaseConfig)</label>
+                    <label class="text-xs font-extrabold text-slate-800">كود إعدادات مشروع Firebase (firebaseConfig)</label>
                     <span id="modal-cloud-status" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">وضع محلي</span>
                 </div>
-                <textarea id="firebase-config-textarea" rows="6" dir="ltr" placeholder='const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "hr-training.firebaseapp.com",
-  projectId: "hr-training",
-  ...
-};' class="w-full rounded-xl border border-slate-300 bg-slate-50 p-3.5 text-xs font-mono text-slate-800 outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+                <textarea id="firebase-config-textarea" rows="6" dir="ltr" class="w-full rounded-xl border border-slate-300 bg-slate-50 p-3.5 text-xs font-mono text-slate-800 outline-none focus:ring-2 focus:ring-primary-500"></textarea>
                 <div class="flex flex-wrap gap-2">
                     <button type="button" onclick="saveAndConnectFirebase()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center gap-1.5">
                         <i class="fa-solid fa-plug-circle-check"></i> حفظ وتفعيل المزامنة السحابية
                     </button>
                     <button type="button" onclick="disconnectFirebase()" class="bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-xs font-bold py-2.5 px-4 rounded-xl transition">
                         فصل الربط السحابي
-                    </button>
-                </div>
-            </div>
-
-            <!-- HR Login Protection Section -->
-            <div class="border-t border-slate-100 pt-5 space-y-3">
-                <div class="flex items-center justify-between">
-                    <label class="text-xs font-extrabold text-slate-800">2. حماية النظام بشاشة تسجيل دخول (فريق HR)</label>
-                    <label class="inline-flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="sec-enable-login" class="w-4 h-4 text-primary-600 rounded">
-                        <span class="text-xs font-bold text-slate-700">تفعيل شاشة الدخول</span>
-                    </label>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">اسم المستخدم الجديد</label>
-                        <input type="text" id="sec-username" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">كلمة المرور الجديدة</label>
-                        <input type="text" id="sec-password" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold outline-none">
-                    </div>
-                </div>
-                <div class="flex items-center justify-between pt-1">
-                    <button type="button" onclick="saveSecuritySettings()" class="bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition">
-                        <i class="fa-solid fa-key ml-1"></i> حفظ إعدادات الدخول
-                    </button>
-                    <button type="button" onclick="logoutHrSession()" class="text-xs font-bold text-rose-600 hover:underline">
-                        تسجيل الخروج الآن
                     </button>
                 </div>
             </div>
@@ -282,21 +246,32 @@
                 </button>
             </div>
 
-            <!-- Navigation Links -->
-            <nav id="sidebar-nav" class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto"></nav>
+            <!-- Current Logged-in User Card -->
+            <div id="sidebar-user-card" class="mx-4 mt-4 p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                    <div id="sidebar-user-name" class="text-xs font-extrabold text-white truncate">مدير النظام (Admin)</div>
+                    <div id="sidebar-user-role" class="text-[11px] text-teal-400 font-semibold">صلاحيات كاملة</div>
+                </div>
+                <button onclick="logoutHrSession()" title="تسجيل الخروج" class="p-2 rounded-lg bg-slate-700/70 hover:bg-rose-600 text-slate-300 hover:text-white transition text-xs">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
 
-            <!-- Data Management Footer -->
-            <div class="p-4 bg-slate-850 border-t border-slate-800 space-y-2">
+            <!-- Navigation Links -->
+            <nav id="sidebar-nav" class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto"></nav>
+
+            <!-- Data Management Footer (Visible based on permissions) -->
+            <div id="sidebar-db-footer" class="p-4 bg-slate-850 border-t border-slate-800 space-y-2">
                 <p id="db-footer-title" class="text-[11px] font-bold text-slate-400 px-1">إدارة قاعدة البيانات ونقلها (JSON)</p>
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="exportBackup()" class="py-2 px-2.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
                         <i class="fa-solid fa-file-export"></i> <span id="btn-export-json-lbl">تصدير JSON</span>
                     </button>
-                    <button onclick="triggerImportBackup()" class="py-2 px-2.5 bg-primary-600/20 hover:bg-primary-600 text-primary-300 hover:text-white border border-primary-500/30 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
+                    <button id="btn-import-json-wrap" onclick="triggerImportBackup()" class="py-2 px-2.5 bg-primary-600/20 hover:bg-primary-600 text-primary-300 hover:text-white border border-primary-500/30 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
                         <i class="fa-solid fa-file-import"></i> <span id="btn-import-json-lbl">استيراد JSON</span>
                     </button>
                 </div>
-                <button onclick="openClearAllConfirmModal()" class="w-full py-2 px-3 bg-slate-800 hover:bg-rose-900/50 text-slate-400 hover:text-rose-200 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
+                <button id="btn-clear-all-wrap" onclick="openClearAllConfirmModal()" class="w-full py-2 px-3 bg-slate-800 hover:bg-rose-900/50 text-slate-400 hover:text-rose-200 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition">
                     <i class="fa-solid fa-trash-can"></i> <span id="btn-clear-all-lbl">مسح جميع البيانات</span>
                 </button>
                 <input type="file" id="json-import-input" accept=".json,application/json" onchange="handleImportBackup(event)" class="hidden">
@@ -320,7 +295,7 @@
 
                 <div class="flex items-center gap-2 sm:gap-3">
                     <!-- Cloud Sync Status Button -->
-                    <button onclick="openCloudSettingsModal()" id="cloud-status-btn" title="إعدادات المزامنة السحابية والأمان" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition">
+                    <button onclick="handleCloudBadgeClick()" id="cloud-status-btn" title="حالة المزامنة السحابية" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition">
                         <span id="cloud-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
                         <span id="cloud-status-text" class="hidden sm:inline">وضع محلي</span>
                     </button>
@@ -331,9 +306,9 @@
                         <span id="lang-btn-text">English</span>
                     </button>
 
-                    <button onclick="navigate('rounds')" class="hidden md:flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition">
-                        <i class="fa-solid fa-plus"></i>
-                        <span id="btn-header-setup">إعداد دورة</span>
+                    <button id="header-users-btn" onclick="navigate('users')" class="hidden md:flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span id="btn-header-users">الصلاحيات</span>
                     </button>
                 </div>
             </header>
@@ -439,13 +414,12 @@
     <!-- JavaScript Application Logic -->
     <script>
         // =========================================================================
-        // 1. EMBEDDED FIREBASE CONFIG & SECURITY SETTINGS
+        // 1. EMBEDDED FIREBASE CONFIG & CENTRALIZED RBAC SECURITY
         // =========================================================================
-        const STORAGE_KEY = 'hr_training_system_db_v2';
+        const STORAGE_KEY = 'hr_training_system_db_v3';
         const LANG_KEY = 'hr_training_lang_v1';
         const FIREBASE_CFG_KEY = 'hr_training_firebase_cfg_v1';
-        const HR_SECURITY_KEY = 'hr_training_security_v1';
-        const HR_SESSION_KEY = 'hr_training_logged_in_session';
+        const HR_CURRENT_USER_KEY = 'hr_training_active_user_v1';
 
         const DEFAULT_EMBEDDED_FIREBASE_CONFIG = {
             apiKey: "AIzaSyD2d4LeXtvEYBLY0LdysntfngKJjpr5u9Y",
@@ -459,7 +433,21 @@
         window.DEFAULT_EMBEDDED_FIREBASE_CONFIG = DEFAULT_EMBEDDED_FIREBASE_CONFIG;
         window.__applyingCloudSnapshot = false;
 
-        // Safe HTML Attribute Escaping & Excel Cell Value Extraction
+        // Available Screen Permissions
+        const ALL_PERMISSIONS = [
+            { id: 'dashboard', ar: 'لوحة التحكم والإحصائيات', en: 'Dashboard & KPIs' },
+            { id: 'courses', ar: 'تعريف الدورات التدريبية', en: 'Courses Definition' },
+            { id: 'instructors', ar: 'تعريف المحاضرين', en: 'Instructors Definition' },
+            { id: 'trainees', ar: 'تعريف المتدربين', en: 'Trainees Definition' },
+            { id: 'rounds', ar: 'إعداد الدورات التدريبية', en: 'Course Setup' },
+            { id: 'attendance', ar: 'تسجيل الحضور والغياب', en: 'Attendance Checklist' },
+            { id: 'evaluation', ar: 'التقييم ونموذج واتساب', en: 'Evaluation & WhatsApp' },
+            { id: 'trainingRecord', ar: 'سجل التدريب للموظفين', en: 'Employee Training Record' },
+            { id: 'reports', ar: 'تقارير الحضور والغياب', en: 'Attendance Reports' },
+            { id: 'certificates', ar: 'إصدار شهادات التدريب', en: 'Certificates' },
+            { id: 'canEdit', ar: 'صلاحية الإضافة والتعديل والحذف', en: 'Create / Edit / Delete Data' }
+        ];
+
         function escAttr(str) {
             return String(str ?? '')
                 .replace(/&/g, '&amp;')
@@ -494,6 +482,7 @@
                 navDefs: 'البيانات الأساسية (التعريفات)',
                 navOps: 'التشغيل والمتابعة',
                 navOutputs: 'المخرجات والتقارير',
+                navAdmin: 'إدارة النظام والأمان',
                 dashboard: 'لوحة التحكم والإحصائيات',
                 dashboardSub: 'نظرة شاملة على خطة التدريب، معدلات الحضور، وتقييمات الأداء',
                 courses: 'تعريف الدورات التدريبية',
@@ -514,11 +503,13 @@
                 reportsSub: 'كشوف الحاضرين والغائبين قابلة للطباعة والتصدير لإكسل',
                 certificates: 'إصدار شهادات التدريب',
                 certificatesSub: 'توليد وطباعة شهادات معتمدة للمتدربين المجتازين لنسبة الحضور',
+                users: 'المستخدمون والصلاحيات',
+                usersSub: 'إدارة حساب الأدمن الرئيسي وحسابات فريق HR وتحديد صلاحيات كل مستخدم',
                 dbFooter: 'إدارة قاعدة البيانات ونقلها (JSON)',
                 exportJson: 'تصدير JSON',
                 importJson: 'استيراد JSON',
                 clearAll: 'مسح جميع البيانات',
-                headerSetup: 'إعداد دورة',
+                headerUsers: 'الصلاحيات',
                 langBtn: 'English',
                 localMode: 'وضع محلي',
                 cloudConnected: 'متصل ومتزامن',
@@ -531,6 +522,7 @@
                 navDefs: 'Master Data (Definitions)',
                 navOps: 'Operations & Tracking',
                 navOutputs: 'Outputs & Reports',
+                navAdmin: 'System & Security',
                 dashboard: 'Dashboard & KPIs',
                 dashboardSub: 'Comprehensive overview of training plans, attendance rates, and evaluations',
                 courses: 'Courses Definition',
@@ -551,11 +543,13 @@
                 reportsSub: 'Printable and Excel-exportable attendance & absence sheets',
                 certificates: 'Training Certificates',
                 certificatesSub: 'Generate and print official completion certificates for attendees',
+                users: 'Users & Permissions',
+                usersSub: 'Manage Super Admin account and HR team access permissions centrally',
                 dbFooter: 'Database Management (JSON)',
                 exportJson: 'Export JSON',
                 importJson: 'Import JSON',
                 clearAll: 'Clear All Data',
-                headerSetup: 'Setup Course',
+                headerUsers: 'Permissions',
                 langBtn: 'العربية',
                 localMode: 'Local Mode',
                 cloudConnected: 'Cloud Synced',
@@ -568,9 +562,23 @@
         }
 
         // =========================================================================
-        // 3. STATE MANAGEMENT & DEFAULT SEED DATA
+        // 3. STATE MANAGEMENT & CENTRALIZED USERS SCHEMA
         // =========================================================================
+        const defaultUsersList = [
+            {
+                id: 'USR-ADMIN',
+                username: 'admin',
+                password: '123456',
+                fullName: 'مدير النظام (Super Admin)',
+                roleLabel: 'أدمن رئيسي (صلاحيات كاملة)',
+                isSuperAdmin: true,
+                active: true,
+                permissions: ALL_PERMISSIONS.map(p => p.id)
+            }
+        ];
+
         const defaultState = {
+            users: defaultUsersList,
             courses: [
                 { id: 'CRS-101', name: 'مهارات القيادة والإدارة الفعالة', category: 'إداري', hours: 16, costPerRound: 5000, description: 'تنمية مهارات التخطيط، التفويض، وبناء فرق العمل عالية الأداء.' },
                 { id: 'CRS-102', name: 'أساسيات تحليل البيانات باستخدام Excel', category: 'فني', hours: 12, costPerRound: 3500, description: 'إتقان المعادلات المتقدمة، الجداول المحورية Pivot Tables، ولوحات المؤشرات.' },
@@ -609,30 +617,12 @@
                         { traineeId: 'EMP-201', instKnowledge: 5, instInteraction: 5, contentQuality: 4, contentRelevance: 5, comment: 'دورة ممتازة ومفيدة جداً في العمل اليومي', date: '2026-11-12' },
                         { traineeId: 'EMP-202', instKnowledge: 5, instInteraction: 4, contentQuality: 5, contentRelevance: 5, comment: 'المحاضرون متمكنون وأسلوبهم شيق', date: '2026-11-12' }
                     ]
-                },
-                {
-                    id: 'RND-2026-02',
-                    batchName: 'الدفعة الثانية - نوفمبر 2026',
-                    courseId: 'CRS-102',
-                    instructorIds: ['INS-1002'],
-                    startDate: '2026-11-22',
-                    endDate: '2026-11-24',
-                    location: 'معمل الحاسب الآلي',
-                    status: 'قيد التنفيذ',
-                    traineeIds: ['EMP-202', 'EMP-203', 'EMP-204'],
-                    attendance: {
-                        'EMP-202': { status: 'present', note: '' },
-                        'EMP-203': { status: 'present', note: '' }
-                    },
-                    evaluations: []
                 }
             ]
         };
 
         let appState = loadState();
         let currentRoute = 'dashboard';
-        let selectedAttendanceCourseId = '';
-        let selectedAttendanceDate = '';
         let selectedRoundForAttendance = null;
         let selectedRoundForEvaluation = null;
         let selectedRoundForReport = null;
@@ -644,6 +634,11 @@
 
         function normalizeState(raw) {
             const st = raw || {};
+            st.users = Array.isArray(st.users) && st.users.length > 0 ? st.users : JSON.parse(JSON.stringify(defaultUsersList));
+            // Guarantee at least one super admin exists
+            if (!st.users.some(u => u.isSuperAdmin)) {
+                st.users.unshift(JSON.parse(JSON.stringify(defaultUsersList[0])));
+            }
             st.courses = Array.isArray(st.courses) ? st.courses : [];
             st.instructors = Array.isArray(st.instructors) ? st.instructors.map(ins => ({
                 ...ins,
@@ -665,7 +660,7 @@
 
         function loadState() {
             try {
-                const raw = localStorage.getItem(STORAGE_KEY);
+                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('hr_training_system_db_v2');
                 if (raw) {
                     return normalizeState(JSON.parse(raw));
                 }
@@ -690,56 +685,142 @@
         window.applyExternalState = function(newState) {
             appState = normalizeState(newState);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            refreshSessionUserFromState();
+            renderSidebarNav();
             renderCurrentView();
         };
 
         // =========================================================================
-        // 4. SECURITY & CLOUD SYNC UI HANDLERS
+        // 4. CENTRALIZED AUTHENTICATION & PERMISSIONS ENGINE
         // =========================================================================
-        function getSecuritySettings() {
+        function getCurrentSessionUser() {
             try {
-                const raw = localStorage.getItem(HR_SECURITY_KEY);
-                if (raw) return JSON.parse(raw);
-            } catch (e) {}
-            return { enabled: true, username: 'admin', password: '123456' };
+                const raw = sessionStorage.getItem(HR_CURRENT_USER_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                const liveUser = appState.users.find(u => u.id === parsed.id && u.active !== false);
+                return liveUser || null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function refreshSessionUserFromState() {
+            const current = getCurrentSessionUser();
+            if (!current) {
+                checkHrLoginGate();
+                return;
+            }
+            sessionStorage.setItem(HR_CURRENT_USER_KEY, JSON.stringify(current));
+            updateSidebarUserUI(current);
+        }
+
+        function isSuperAdmin() {
+            const u = getCurrentSessionUser();
+            return Boolean(u && u.isSuperAdmin);
+        }
+
+        function hasPermission(permId) {
+            const u = getCurrentSessionUser();
+            if (!u) return false;
+            if (u.isSuperAdmin) return true;
+            if (permId === 'users') return false; // Only Super Admin can manage users & permissions
+            return Array.isArray(u.permissions) && u.permissions.includes(permId);
+        }
+
+        function requireEditPermission() {
+            if (!hasPermission('canEdit')) {
+                showToast(currentLang === 'ar' ? 'عذراً، حسابك يملك صلاحية العرض فقط (View Only)' : 'Access Denied: View-Only permissions', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        function updateSidebarUserUI(user) {
+            if (!user) return;
+            const nameEl = document.getElementById('sidebar-user-name');
+            const roleEl = document.getElementById('sidebar-user-role');
+            const headerUsersBtn = document.getElementById('header-users-btn');
+            const importWrap = document.getElementById('btn-import-json-wrap');
+            const clearWrap = document.getElementById('btn-clear-all-wrap');
+
+            if (nameEl) nameEl.textContent = user.fullName || user.username;
+            if (roleEl) roleEl.textContent = user.isSuperAdmin
+                ? (currentLang === 'ar' ? 'أدمن رئيسي (تحكم كامل)' : 'Super Admin')
+                : (user.roleLabel || (currentLang === 'ar' ? 'مستخدم HR' : 'HR User'));
+
+            if (headerUsersBtn) {
+                headerUsersBtn.classList.toggle('hidden', !user.isSuperAdmin);
+                headerUsersBtn.classList.toggle('md:flex', user.isSuperAdmin);
+            }
+            if (importWrap) importWrap.style.display = user.isSuperAdmin ? 'flex' : 'none';
+            if (clearWrap) clearWrap.style.display = user.isSuperAdmin ? 'flex' : 'none';
         }
 
         function checkHrLoginGate() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('evalRound')) return;
 
-            const sec = getSecuritySettings();
-            const isLogged = sessionStorage.getItem(HR_SESSION_KEY) === '1';
+            const user = getCurrentSessionUser();
             const overlay = document.getElementById('hr-login-overlay');
-            if (sec.enabled && !isLogged) {
+            if (!user) {
                 overlay.classList.remove('hidden');
             } else {
                 overlay.classList.add('hidden');
+                updateSidebarUserUI(user);
+                if (!hasPermission(currentRoute)) {
+                    const firstAllowed = ALL_PERMISSIONS.find(p => p.id !== 'canEdit' && hasPermission(p.id));
+                    if (firstAllowed) currentRoute = firstAllowed.id;
+                }
             }
         }
 
         function handleHrLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('login-username').value.trim();
-            const p = document.getElementById('login-password').value.trim();
-            const sec = getSecuritySettings();
+            const usernameInput = document.getElementById('login-username').value.trim().toLowerCase();
+            const passwordInput = document.getElementById('login-password').value.trim();
             const errEl = document.getElementById('login-error-msg');
 
-            if (u === sec.username && p === sec.password) {
-                sessionStorage.setItem(HR_SESSION_KEY, '1');
+            const matchedUser = appState.users.find(u =>
+                u.active !== false &&
+                u.username.trim().toLowerCase() === usernameInput &&
+                u.password === passwordInput
+            );
+
+            if (matchedUser) {
+                sessionStorage.setItem(HR_CURRENT_USER_KEY, JSON.stringify(matchedUser));
                 errEl.classList.add('hidden');
                 document.getElementById('hr-login-overlay').classList.add('hidden');
-                showToast(currentLang === 'ar' ? 'تم تسجيل الدخول بنجاح' : 'Logged in successfully', 'success');
+                updateSidebarUserUI(matchedUser);
+                renderSidebarNav();
+                if (!hasPermission(currentRoute)) {
+                    const firstAllowed = ALL_PERMISSIONS.find(p => p.id !== 'canEdit' && hasPermission(p.id));
+                    if (firstAllowed) currentRoute = firstAllowed.id;
+                }
+                updateHeaderMeta();
+                renderCurrentView();
+                showToast(currentLang === 'ar' ? `مرحباً ${matchedUser.fullName}` : `Welcome ${matchedUser.fullName}`, 'success');
             } else {
-                errEl.textContent = currentLang === 'ar' ? 'اسم المستخدم أو كلمة المرور غير صحيحة' : 'Invalid username or password';
+                errEl.textContent = currentLang === 'ar'
+                    ? 'بيانات الدخول غير صحيحة أو الحساب موقوف'
+                    : 'Invalid credentials or inactive account';
                 errEl.classList.remove('hidden');
             }
         }
 
         function logoutHrSession() {
-            sessionStorage.removeItem(HR_SESSION_KEY);
-            closeCloudSettingsModal();
+            sessionStorage.removeItem(HR_CURRENT_USER_KEY);
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
             checkHrLoginGate();
+        }
+
+        function handleCloudBadgeClick() {
+            if (!isSuperAdmin()) {
+                showToast(currentLang === 'ar' ? 'إعدادات السحابة متاحة للأدمن الرئيسي فقط' : 'Cloud settings are restricted to Super Admin', 'info');
+                return;
+            }
+            openCloudSettingsModal();
         }
 
         window.updateCloudStatusBadge = function(status) {
@@ -773,14 +854,10 @@
         };
 
         function openCloudSettingsModal() {
+            if (!isSuperAdmin()) return;
             const savedCfg = localStorage.getItem(FIREBASE_CFG_KEY);
             const activeCfg = savedCfg ? JSON.parse(savedCfg) : DEFAULT_EMBEDDED_FIREBASE_CONFIG;
             document.getElementById('firebase-config-textarea').value = JSON.stringify(activeCfg, null, 2);
-
-            const sec = getSecuritySettings();
-            document.getElementById('sec-enable-login').checked = Boolean(sec.enabled);
-            document.getElementById('sec-username').value = sec.username || 'admin';
-            document.getElementById('sec-password').value = sec.password || '123456';
             document.getElementById('cloud-settings-modal').classList.remove('hidden');
         }
 
@@ -795,28 +872,21 @@
             keys.forEach(k => {
                 const regex = new RegExp(`["']?${k}["']?\\s*:\\s*["']([^"']+)["']`);
                 const match = cleaned.match(regex);
-                if (match && match[1]) {
-                    extracted[k] = match[1].trim();
-                }
+                if (match && match[1]) extracted[k] = match[1].trim();
             });
-            if (extracted.apiKey && extracted.projectId) return extracted;
-            return null;
+            return (extracted.apiKey && extracted.projectId) ? extracted : null;
         }
 
         async function saveAndConnectFirebase() {
             const raw = document.getElementById('firebase-config-textarea').value.trim();
             const parsed = parseFirebaseConfigInput(raw);
             if (!parsed) {
-                showToast(currentLang === 'ar' ? 'تعذر قراءة apiKey و projectId من الكود المدخل' : 'Could not extract apiKey and projectId', 'error');
+                showToast('تعذر قراءة apiKey و projectId', 'error');
                 return;
             }
             localStorage.setItem(FIREBASE_CFG_KEY, JSON.stringify(parsed));
             const ok = await window.initCloudSync(parsed, true);
-            if (ok) {
-                showToast(currentLang === 'ar' ? 'تم الاتصال بسحابة Firebase وتفعيل المزامنة الفورية!' : 'Connected to Firebase Cloud Sync!', 'success');
-            } else {
-                showToast(currentLang === 'ar' ? 'فشل الاتصال: تأكد من تفعيل Firestore Database في مشروعك' : 'Connection failed: verify Firestore is enabled', 'error');
-            }
+            showToast(ok ? 'تم الاتصال بسحابة Firebase بنجاح!' : 'فشل الاتصال بقاعدة البيانات', ok ? 'success' : 'error');
         }
 
         function disconnectFirebase() {
@@ -824,19 +894,11 @@
             if (window.__fbUnsubscribe) window.__fbUnsubscribe();
             window.__fbDb = null;
             window.updateCloudStatusBadge('local');
-            showToast(currentLang === 'ar' ? 'تم التحويل إلى الوضع المحلي' : 'Switched to Local Mode', 'info');
-        }
-
-        function saveSecuritySettings() {
-            const enabled = document.getElementById('sec-enable-login').checked;
-            const username = document.getElementById('sec-username').value.trim() || 'admin';
-            const password = document.getElementById('sec-password').value.trim() || '123456';
-            localStorage.setItem(HR_SECURITY_KEY, JSON.stringify({ enabled, username, password }));
-            showToast(currentLang === 'ar' ? 'تم حفظ إعدادات الدخول والأمان بنجاح' : 'Security settings saved', 'success');
+            showToast('تم التحويل إلى الوضع المحلي', 'info');
         }
 
         // =========================================================================
-        // 5. NAVIGATION, LANGUAGE SWITCHING & BACKUP UTILITIES
+        // 5. NAVIGATION & LANGUAGE SWITCHING
         // =========================================================================
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -881,8 +943,11 @@
             document.getElementById('btn-export-json-lbl').textContent = t('exportJson');
             document.getElementById('btn-import-json-lbl').textContent = t('importJson');
             document.getElementById('btn-clear-all-lbl').textContent = t('clearAll');
-            document.getElementById('btn-header-setup').textContent = t('headerSetup');
+            document.getElementById('btn-header-users').textContent = t('headerUsers');
             document.getElementById('lang-btn-text').textContent = t('langBtn');
+
+            const u = getCurrentSessionUser();
+            if (u) updateSidebarUserUI(u);
 
             renderSidebarNav();
             updateHeaderMeta();
@@ -896,7 +961,7 @@
         }
 
         function renderSidebarNav() {
-            const navItems = [
+            const navGroups = [
                 { section: t('navMain'), items: [
                     { id: 'dashboard', icon: 'fa-chart-pie', label: t('dashboard') }
                 ]},
@@ -914,24 +979,31 @@
                     { id: 'trainingRecord', icon: 'fa-id-card-clip', label: t('trainingRecord') },
                     { id: 'reports', icon: 'fa-file-invoice', label: t('reports') },
                     { id: 'certificates', icon: 'fa-award', label: t('certificates') }
+                ]},
+                { section: t('navAdmin'), items: [
+                    { id: 'users', icon: 'fa-user-shield', label: t('users'), adminOnly: true }
                 ]}
             ];
 
-            document.getElementById('sidebar-nav').innerHTML = navItems.map((group, idx) => `
-                <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider ${idx > 0 ? 'mt-5' : ''} mb-2">${group.section}</p>
-                ${group.items.map(item => {
-                    const active = currentRoute === item.id;
-                    const cls = active
-                        ? 'bg-primary-600 text-white shadow-md font-semibold'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium';
-                    return `
-                        <button onclick="navigate('${item.id}')" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all ${cls}">
-                            <i class="fa-solid ${item.icon} w-5 text-center"></i>
-                            <span class="truncate">${item.label}</span>
-                        </button>
-                    `;
-                }).join('')}
-            `).join('');
+            document.getElementById('sidebar-nav').innerHTML = navGroups.map((group, idx) => {
+                const visibleItems = group.items.filter(item => item.adminOnly ? isSuperAdmin() : hasPermission(item.id));
+                if (visibleItems.length === 0) return '';
+                return `
+                    <p class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider ${idx > 0 ? 'mt-5' : ''} mb-2">${group.section}</p>
+                    ${visibleItems.map(item => {
+                        const active = currentRoute === item.id;
+                        const cls = active
+                            ? 'bg-primary-600 text-white shadow-md font-semibold'
+                            : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium';
+                        return `
+                            <button onclick="navigate('${item.id}')" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all ${cls}">
+                                <i class="fa-solid ${item.icon} w-5 text-center"></i>
+                                <span class="truncate">${item.label}</span>
+                            </button>
+                        `;
+                    }).join('')}
+                `;
+            }).join('');
         }
 
         function updateHeaderMeta() {
@@ -942,6 +1014,14 @@
         }
 
         function navigate(route) {
+            if (route === 'users' && !isSuperAdmin()) {
+                showToast('هذه الشاشة مخصصة للأدمن الرئيسي فقط', 'error');
+                return;
+            }
+            if (route !== 'users' && !hasPermission(route)) {
+                showToast('ليس لديك صلاحية للوصول إلى هذه الشاشة', 'error');
+                return;
+            }
             currentRoute = route;
             renderSidebarNav();
             updateHeaderMeta();
@@ -967,11 +1047,307 @@
                 case 'trainingRecord': main.innerHTML = renderTrainingRecordView(); break;
                 case 'reports': main.innerHTML = renderReportsView(); break;
                 case 'certificates': main.innerHTML = renderCertificatesView(); break;
+                case 'users': main.innerHTML = renderUsersPermissionsView(); break;
             }
         }
 
         // =========================================================================
-        // 6. HELPERS & LOOKUPS
+        // 6. VIEW: USERS & PERMISSIONS MANAGEMENT (شاشة المستخدمين والصلاحيات - للأدمن فقط)
+        // =========================================================================
+        function renderUsersPermissionsView() {
+            if (!isSuperAdmin()) {
+                return `<div class="bg-white p-8 rounded-2xl text-center text-rose-600 font-bold">غير مصرح لك بعرض هذه الصفحة.</div>`;
+            }
+
+            const superAdminUser = appState.users.find(u => u.isSuperAdmin) || appState.users[0];
+            const staffUsers = appState.users.filter(u => !u.isSuperAdmin);
+
+            return `
+                <div class="space-y-6">
+                    <!-- Super Admin Dedicated Account Card -->
+                    <div class="bg-gradient-to-l from-slate-900 via-slate-850 to-primary-950 text-white p-6 rounded-2xl shadow-lg border border-slate-700">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-extrabold">
+                                    <i class="fa-solid fa-crown"></i> حساب الأدمن الرئيسي (لك وحدك فقط)
+                                </div>
+                                <h3 class="text-xl font-extrabold mt-1">${superAdminUser.fullName}</h3>
+                                <p class="text-xs text-slate-300">اسم المستخدم: <strong class="font-mono text-teal-300">${superAdminUser.username}</strong> • يملك صلاحية كاملة لإدارة المستخدمين والصلاحيات والبيانات ولا يمكن لأي مستخدم آخر تعديله.</p>
+                            </div>
+                            <button onclick="openEditSuperAdminModal()" class="px-5 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold rounded-xl shadow-md transition flex items-center gap-2 shrink-0">
+                                <i class="fa-solid fa-key"></i> تغيير بيانات وكلمة مرور الأدمن الرئيسي
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Add New HR Staff User Form -->
+                        <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm h-fit">
+                            <h3 class="font-bold text-lg text-slate-800 mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-user-plus text-primary-600"></i> إنشاء حساب مستخدم جديد (فريق HR)
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-5">حدد اسم المستخدم وكلمة المرور والشاشات المسموح له بالدخول عليها</p>
+
+                            <form onsubmit="handleAddStaffUser(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الكامل للموظف *</label>
+                                    <input type="text" id="new-u-fullname" required placeholder="مثال: أ. سارة محمود - أخصائي تدريب" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">اسم المستخدم (Username) *</label>
+                                        <input type="text" id="new-u-username" required placeholder="sara.hr" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور *</label>
+                                        <input type="text" id="new-u-password" required placeholder="123456" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">المسمى الوظيفي / الدور</label>
+                                    <input type="text" id="new-u-role" placeholder="مثال: منسق تدريب / مشاهد تقارير" value="أخصائي تدريب" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <label class="text-xs font-bold text-slate-700">تحديد الصلاحيات والشاشات المسموحة:</label>
+                                        <button type="button" onclick="toggleAllNewUserPerms()" class="text-xs font-bold text-primary-600 hover:underline">تحديد / إلغاء الكل</button>
+                                    </div>
+                                    <div class="max-h-56 overflow-y-auto border border-slate-300 rounded-xl p-2.5 bg-slate-50 space-y-1.5">
+                                        ${ALL_PERMISSIONS.map(p => `
+                                            <label class="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-slate-200 text-xs cursor-pointer hover:border-primary-300">
+                                                <input type="checkbox" name="newUserPerms" value="${p.id}" ${p.id === 'dashboard' || p.id === 'attendance' ? 'checked' : ''} class="new-user-perm-cb rounded text-primary-600">
+                                                <span class="font-bold ${p.id === 'canEdit' ? 'text-amber-700' : 'text-slate-700'}">${currentLang === 'ar' ? p.ar : p.en}</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-md transition">
+                                    <i class="fa-solid fa-user-check ml-1"></i> حفظ الحساب وتفعيل الصلاحيات فوراً
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Existing Staff Users Table -->
+                        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                            <div class="p-6 border-b border-slate-100">
+                                <h3 class="font-bold text-lg text-slate-800">حسابات فريق العمل المسجلة (${staffUsers.length})</h3>
+                                <p class="text-xs text-slate-500">تُحفظ الحسابات والصلاحيات في سحابة Firebase وتُطبق تلقائياً على جميع الأجهزة</p>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-start border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                            <th class="py-3.5 px-4 font-bold">الموظف والدور</th>
+                                            <th class="py-3.5 px-4 font-bold">بيانات الدخول</th>
+                                            <th class="py-3.5 px-4 font-bold">الصلاحيات</th>
+                                            <th class="py-3.5 px-4 font-bold text-center">إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 text-sm">
+                                        ${staffUsers.length === 0 ? `<tr><td colspan="4" class="py-8 text-center text-slate-400 text-xs">لم تقم بإضافة حسابات لفريق العمل بعد.</td></tr>` : staffUsers.map(u => {
+                                            const canEditFlag = (u.permissions || []).includes('canEdit');
+                                            const screensCount = (u.permissions || []).filter(p => p !== 'canEdit').length;
+                                            return `
+                                                <tr class="hover:bg-slate-50/80">
+                                                    <td class="py-3.5 px-4">
+                                                        <div class="font-bold text-slate-800">${u.fullName}</div>
+                                                        <div class="text-xs text-slate-500">${u.roleLabel || '-'}</div>
+                                                    </td>
+                                                    <td class="py-3.5 px-4 text-xs font-mono">
+                                                        <div>User: <strong class="text-primary-700">${u.username}</strong></div>
+                                                        <div>Pass: <span class="text-slate-500">${u.password}</span></div>
+                                                    </td>
+                                                    <td class="py-3.5 px-4">
+                                                        <div class="text-xs font-bold text-slate-700">${screensCount} شاشات</div>
+                                                        <span class="inline-block mt-0.5 px-2 py-0.5 rounded text-[11px] font-bold ${canEditFlag ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
+                                                            ${canEditFlag ? 'تعديل وعرض' : 'عرض فقط (View Only)'}
+                                                        </span>
+                                                    </td>
+                                                    <td class="py-3.5 px-4 text-center space-x-1 space-x-reverse">
+                                                        <button onclick="openEditStaffUserModal('${escAttr(u.id)}')" class="px-2.5 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg text-xs font-bold transition" title="تعديل الصلاحيات">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
+                                                        </button>
+                                                        <button onclick="deleteStaffUser('${escAttr(u.id)}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition" title="حذف الحساب">
+                                                            <i class="fa-solid fa-trash-can"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleAllNewUserPerms() {
+            const cbs = document.querySelectorAll('.new-user-perm-cb');
+            const allChecked = Array.from(cbs).every(cb => cb.checked);
+            cbs.forEach(cb => cb.checked = !allChecked);
+        }
+
+        function handleAddStaffUser(e) {
+            e.preventDefault();
+            if (!isSuperAdmin()) return;
+            const fullName = document.getElementById('new-u-fullname').value.trim();
+            const username = document.getElementById('new-u-username').value.trim();
+            const password = document.getElementById('new-u-password').value.trim();
+            const roleLabel = document.getElementById('new-u-role').value.trim();
+            const permissions = Array.from(document.querySelectorAll('input[name="newUserPerms"]:checked')).map(cb => cb.value);
+
+            if (appState.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                showToast('اسم المستخدم مستخدم بالفعل، اختر اسماً آخر', 'error');
+                return;
+            }
+            if (permissions.length === 0) {
+                showToast('يرجى اختيار شاشة واحدة على الأقل للمستخدم', 'error');
+                return;
+            }
+
+            appState.users.push({
+                id: 'USR-' + String(Date.now()).slice(-5),
+                username,
+                password,
+                fullName,
+                roleLabel,
+                isSuperAdmin: false,
+                active: true,
+                permissions
+            });
+            saveState();
+            showToast('تم إنشاء حساب المستخدم وتفعيل صلاحياته بنجاح!', 'success');
+            renderCurrentView();
+        }
+
+        function openEditSuperAdminModal() {
+            if (!isSuperAdmin()) return;
+            const adminUser = appState.users.find(u => u.isSuperAdmin) || appState.users[0];
+            openGenericModal('تعديل بيانات وكلمة مرور الأدمن الرئيسي', `
+                <form onsubmit="saveSuperAdminCredentials(event, '${escAttr(adminUser.id)}')" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الظاهر للأدمن</label>
+                        <input type="text" id="sa-fullname" required value="${escAttr(adminUser.fullName)}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">اسم المستخدم (Username)</label>
+                            <input type="text" id="sa-username" required value="${escAttr(adminUser.username)}" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور الجديدة (Password)</label>
+                            <input type="text" id="sa-password" required value="${escAttr(adminUser.password)}" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-sm">
+                        حفظ بيانات الأدمن في السحابة
+                    </button>
+                </form>
+            `);
+        }
+
+        function saveSuperAdminCredentials(e, adminId) {
+            e.preventDefault();
+            if (!isSuperAdmin()) return;
+            const adminUser = appState.users.find(u => u.id === adminId);
+            if (!adminUser) return;
+            const newUsername = document.getElementById('sa-username').value.trim();
+            if (appState.users.some(u => u.id !== adminId && u.username.toLowerCase() === newUsername.toLowerCase())) {
+                showToast('اسم المستخدم محجوز لموظف آخر', 'error');
+                return;
+            }
+            adminUser.fullName = document.getElementById('sa-fullname').value.trim();
+            adminUser.username = newUsername;
+            adminUser.password = document.getElementById('sa-password').value.trim();
+            sessionStorage.setItem(HR_CURRENT_USER_KEY, JSON.stringify(adminUser));
+            saveState();
+            updateSidebarUserUI(adminUser);
+            closeGenericModal();
+            showToast('تم تحديث بيانات وكلمة مرور الأدمن بنجاح!', 'success');
+            renderCurrentView();
+        }
+
+        function openEditStaffUserModal(userId) {
+            if (!isSuperAdmin()) return;
+            const u = appState.users.find(x => x.id === userId && !x.isSuperAdmin);
+            if (!u) return;
+
+            openGenericModal(`تعديل صلاحيات: ${u.fullName}`, `
+                <form onsubmit="saveEditedStaffUser(event, '${escAttr(u.id)}')" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الكامل</label>
+                            <input type="text" id="edit-u-fullname" required value="${escAttr(u.fullName)}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الدور / الوظيفة</label>
+                            <input type="text" id="edit-u-role" value="${escAttr(u.roleLabel || '')}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">اسم المستخدم</label>
+                            <input type="text" id="edit-u-username" required value="${escAttr(u.username)}" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
+                            <input type="text" id="edit-u-password" required value="${escAttr(u.password)}" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">الشاشات والصلاحيات المفعلة:</label>
+                        <div class="max-h-56 overflow-y-auto border border-slate-300 rounded-xl p-2.5 bg-slate-50 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                            ${ALL_PERMISSIONS.map(p => `
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 text-xs cursor-pointer">
+                                    <input type="checkbox" name="editUserPerms" value="${p.id}" ${(u.permissions || []).includes(p.id) ? 'checked' : ''} class="rounded text-primary-600">
+                                    <span class="font-bold ${p.id === 'canEdit' ? 'text-amber-700' : 'text-slate-700'}">${currentLang === 'ar' ? p.ar : p.en}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 rounded-xl shadow-sm">
+                        حفظ التعديلات والصلاحيات
+                    </button>
+                </form>
+            `);
+        }
+
+        function saveEditedStaffUser(e, userId) {
+            e.preventDefault();
+            if (!isSuperAdmin()) return;
+            const u = appState.users.find(x => x.id === userId && !x.isSuperAdmin);
+            if (!u) return;
+            const newUsername = document.getElementById('edit-u-username').value.trim();
+            if (appState.users.some(x => x.id !== userId && x.username.toLowerCase() === newUsername.toLowerCase())) {
+                showToast('اسم المستخدم محجوز لموظف آخر', 'error');
+                return;
+            }
+            u.fullName = document.getElementById('edit-u-fullname').value.trim();
+            u.roleLabel = document.getElementById('edit-u-role').value.trim();
+            u.username = newUsername;
+            u.password = document.getElementById('edit-u-password').value.trim();
+            u.permissions = Array.from(document.querySelectorAll('input[name="editUserPerms"]:checked')).map(cb => cb.value);
+
+            saveState();
+            closeGenericModal();
+            showToast('تم تحديث صلاحيات المستخدم بنجاح', 'success');
+            renderCurrentView();
+        }
+
+        function deleteStaffUser(userId) {
+            if (!isSuperAdmin()) return;
+            appState.users = appState.users.filter(u => u.id !== userId || u.isSuperAdmin);
+            saveState();
+            showToast('تم حذف حساب المستخدم', 'info');
+            renderCurrentView();
+        }
+
+        // =========================================================================
+        // 7. HELPERS & LOOKUPS
         // =========================================================================
         function getCourse(id) {
             return appState.courses.find(c => c.id === id) || { id: id || '-', name: currentLang === 'ar' ? 'دورة غير معرفة' : 'Unknown Course', category: '-', hours: 0, costPerRound: 0 };
@@ -1019,20 +1395,22 @@
         }
 
         function openClearAllConfirmModal() {
+            if (!isSuperAdmin()) return;
             const modal = document.getElementById('confirm-action-modal');
             document.getElementById('confirm-modal-icon').className = 'w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0';
             document.getElementById('confirm-modal-icon').innerHTML = '<i class="fa-solid fa-trash-can"></i>';
-            document.getElementById('confirm-modal-title').textContent = currentLang === 'ar' ? 'مسح جميع البيانات والبدء من الصفر' : 'Clear All Data';
-            document.getElementById('confirm-modal-desc').textContent = currentLang === 'ar' ? 'تحذير: سيتم حذف كافة الدورات والمحاضرين والمتدربين والدفعات نهائياً.' : 'Warning: All courses, instructors, trainees, and rounds will be erased.';
-            document.getElementById('confirm-modal-details').innerHTML = currentLang === 'ar' ? 'يُنصح بتصدير نسخة احتياطية <strong>JSON</strong> أولاً قبل المسح.' : 'Please export a <strong>JSON</strong> backup first.';
+            document.getElementById('confirm-modal-title').textContent = 'مسح جميع بيانات التدريب';
+            document.getElementById('confirm-modal-desc').textContent = 'تحذير: سيتم مسح الدورات والمحاضرين والمتدربين والدفعات (مع الإبقاء على حسابات المستخدمين).';
+            document.getElementById('confirm-modal-details').innerHTML = 'يُنصح بتصدير نسخة احتياطية <strong>JSON</strong> أولاً.';
             const btn = document.getElementById('confirm-modal-btn');
             btn.className = 'flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition';
-            btn.textContent = currentLang === 'ar' ? 'نعم، مسح الكل' : 'Yes, Clear All';
+            btn.textContent = 'نعم، مسح البيانات';
             btn.onclick = function() {
-                appState = { courses: [], instructors: [], trainees: [], rounds: [] };
+                const keepUsers = appState.users;
+                appState = { users: keepUsers, courses: [], instructors: [], trainees: [], rounds: [] };
                 saveState();
                 closeConfirmModal();
-                showToast(currentLang === 'ar' ? 'تم تفريغ جميع البيانات بنجاح' : 'All data cleared', 'info');
+                showToast('تم تفريغ بيانات التدريب بنجاح', 'info');
                 renderCurrentView();
             };
             modal.classList.remove('hidden');
@@ -1043,7 +1421,7 @@
         }
 
         function exportBackup() {
-            const backupPayload = { meta: { system: 'HR Training System', version: '2.0', exportedAt: new Date().toISOString() }, data: appState };
+            const backupPayload = { meta: { system: 'HR Training System', version: '3.0', exportedAt: new Date().toISOString() }, data: appState };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
             const a = document.createElement('a');
             a.setAttribute("href", dataStr);
@@ -1051,16 +1429,18 @@
             document.body.appendChild(a);
             a.click();
             a.remove();
-            showToast(currentLang === 'ar' ? 'تم تصدير قاعدة البيانات JSON بنجاح' : 'JSON Database exported', 'success');
+            showToast('تم تصدير قاعدة البيانات JSON بنجاح', 'success');
         }
 
         function triggerImportBackup() {
+            if (!isSuperAdmin()) return;
             const input = document.getElementById('json-import-input');
             input.value = '';
             input.click();
         }
 
         function handleImportBackup(event) {
+            if (!isSuperAdmin()) return;
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -1072,6 +1452,7 @@
                         showToast('ملف JSON غير صالح', 'error');
                         return;
                     }
+                    if (!Array.isArray(candidate.users)) candidate.users = appState.users;
                     appState = normalizeState(candidate);
                     saveState();
                     showToast('تم استيراد قاعدة البيانات بنجاح!', 'success');
@@ -1084,7 +1465,7 @@
         }
 
         // =========================================================================
-        // 7. VIEW 1: DASHBOARD (لوحة التحكم)
+        // 8. VIEW 1: DASHBOARD
         // =========================================================================
         function renderDashboard() {
             const totalCourses = appState.courses.length;
@@ -1155,81 +1536,51 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-                            <div>
-                                <h3 class="font-bold text-lg text-slate-800">${currentLang === 'ar' ? 'الدفعات التدريبية المجدولة والمنفذة' : 'Scheduled & Completed Rounds'}</h3>
-                            </div>
-                            <button onclick="navigate('rounds')" class="text-sm font-semibold text-primary-600 hover:text-primary-700">
-                                ${currentLang === 'ar' ? 'إدارة الدفعات' : 'Manage Rounds'}
-                            </button>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-start border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الدورة التدريبية' : 'Course'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'المحاضرون' : 'Instructors'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التاريخ' : 'Date'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الحضور' : 'Attendance'}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100 text-sm">
-                                    ${appState.rounds.map(r => {
-                                        const c = getCourse(r.courseId);
-                                        const st = calcRoundStats(r);
-                                        return `
-                                            <tr class="hover:bg-slate-50/80 transition">
-                                                <td class="py-3.5 px-4">
-                                                    <div class="font-bold text-slate-800">${c.name}</div>
-                                                    <div class="text-xs text-slate-500">${r.batchName}</div>
-                                                </td>
-                                                <td class="py-3.5 px-4 text-slate-600 font-medium text-xs">${getRoundInstructorsNames(r)}</td>
-                                                <td class="py-3.5 px-4 text-xs text-slate-500">${r.startDate}</td>
-                                                <td class="py-3.5 px-4 font-bold text-emerald-600">${st.attendanceRate}% (${st.present}/${st.total})</td>
-                                            </tr>
-                                        `;
-                                    }).join('')}
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                        <h3 class="font-bold text-lg text-slate-800">${currentLang === 'ar' ? 'الدفعات التدريبية المجدولة والمنفذة' : 'Scheduled & Completed Rounds'}</h3>
                     </div>
-
-                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-3">
-                        <h3 class="font-bold text-lg text-slate-800">${currentLang === 'ar' ? 'اختصارات سريعة' : 'Quick Shortcuts'}</h3>
-                        <button onclick="navigate('rounds')" class="w-full p-3.5 rounded-xl border border-slate-200 hover:border-primary-400 hover:bg-primary-50/50 transition flex items-center gap-3 text-start">
-                            <div class="w-9 h-9 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center font-bold"><i class="fa-solid fa-calendar-plus"></i></div>
-                            <div>
-                                <div class="font-bold text-sm text-slate-800">${t('rounds')}</div>
-                                <div class="text-xs text-slate-500">${currentLang === 'ar' ? 'تسكين المتدربين وتنزيل شيت الإكسل' : 'Enroll trainees & download matrix Excel'}</div>
-                            </div>
-                        </button>
-                        <button onclick="navigate('attendance')" class="w-full p-3.5 rounded-xl border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex items-center gap-3 text-start">
-                            <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold"><i class="fa-solid fa-clipboard-check"></i></div>
-                            <div>
-                                <div class="font-bold text-sm text-slate-800">${t('attendance')}</div>
-                                <div class="text-xs text-slate-500">${currentLang === 'ar' ? 'تحضير المتدربين بالدورة والتاريخ' : 'Record attendance by course & date'}</div>
-                            </div>
-                        </button>
-                        <button onclick="navigate('trainingRecord')" class="w-full p-3.5 rounded-xl border border-slate-200 hover:border-teal-400 hover:bg-teal-50/50 transition flex items-center gap-3 text-start">
-                            <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center font-bold"><i class="fa-solid fa-id-card-clip"></i></div>
-                            <div>
-                                <div class="font-bold text-sm text-slate-800">${t('trainingRecord')}</div>
-                                <div class="text-xs text-slate-500">${currentLang === 'ar' ? 'سجل دورات وساعات كل موظف خلال العام' : 'Annual training history per employee'}</div>
-                            </div>
-                        </button>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-start border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                                    <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الدورة التدريبية' : 'Course'}</th>
+                                    <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'المحاضرون' : 'Instructors'}</th>
+                                    <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التاريخ' : 'Date'}</th>
+                                    <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الحضور' : 'Attendance'}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm">
+                                ${appState.rounds.map(r => {
+                                    const c = getCourse(r.courseId);
+                                    const st = calcRoundStats(r);
+                                    return `
+                                        <tr class="hover:bg-slate-50/80 transition">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-bold text-slate-800">${c.name}</div>
+                                                <div class="text-xs text-slate-500">${r.batchName}</div>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-slate-600 font-medium text-xs">${getRoundInstructorsNames(r)}</td>
+                                            <td class="py-3.5 px-4 text-xs text-slate-500">${r.startDate}</td>
+                                            <td class="py-3.5 px-4 font-bold text-emerald-600">${st.attendanceRate}% (${st.present}/${st.total})</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             `;
         }
 
         // =========================================================================
-        // 8. VIEW 2: COURSES DEFINITION (تعريف الدورات التدريبية + Excel)
+        // 9. VIEW 2: COURSES DEFINITION
         // =========================================================================
         function renderCoursesView() {
+            const canEdit = hasPermission('canEdit');
             return `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    ${canEdit ? `
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm h-fit">
                         <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-book-medical text-primary-600"></i> ${currentLang === 'ar' ? 'إضافة دورة تدريبية' : 'Add Training Course'}
@@ -1237,11 +1588,11 @@
                         <form onsubmit="handleAddCourse(event)" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'كود الدورة' : 'Course Code'}</label>
-                                <input type="text" id="course-code" required value="CRS-${101 + appState.courses.length}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                                <input type="text" id="course-code" required value="CRS-${101 + appState.courses.length}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'اسم البرنامج التدريبي' : 'Course Name'} *</label>
-                                <input type="text" id="course-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                                <input type="text" id="course-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
@@ -1270,19 +1621,21 @@
                                 <i class="fa-solid fa-plus ml-1"></i> ${currentLang === 'ar' ? 'حفظ الدورة' : 'Save Course'}
                             </button>
                         </form>
-                    </div>
+                    </div>` : ''}
 
-                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="${canEdit ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                         <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
                             <h3 class="font-bold text-lg text-slate-800">${currentLang === 'ar' ? 'دليل الدورات التدريبية' : 'Courses Directory'} (${appState.courses.length})</h3>
                             <div class="flex flex-wrap gap-2">
                                 <button onclick="downloadCoursesExcelTemplate()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-file-excel"></i> ${currentLang === 'ar' ? 'تنزيل قالب Excel' : 'Download Excel'}
                                 </button>
+                                ${canEdit ? `
                                 <button onclick="document.getElementById('courses-excel-input').click()" class="px-3.5 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
                                     <i class="fa-solid fa-upload"></i> ${currentLang === 'ar' ? 'رفع من Excel' : 'Upload Excel'}
                                 </button>
                                 <input type="file" id="courses-excel-input" accept=".xlsx,.xls,.csv" onchange="handleCoursesExcelUpload(event)" class="hidden">
+                                ` : ''}
                             </div>
                         </div>
                         <div class="overflow-x-auto">
@@ -1293,7 +1646,7 @@
                                         <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'اسم الدورة' : 'Course Name'}</th>
                                         <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التصنيف' : 'Category'}</th>
                                         <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الساعات' : 'Hours'}</th>
-                                        <th class="py-3.5 px-4 font-bold text-center">${currentLang === 'ar' ? 'إجراءات' : 'Actions'}</th>
+                                        ${canEdit ? `<th class="py-3.5 px-4 font-bold text-center">${currentLang === 'ar' ? 'إجراءات' : 'Actions'}</th>` : ''}
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 text-sm">
@@ -1303,10 +1656,11 @@
                                             <td class="py-3.5 px-4 font-bold text-slate-800">${c.name}</td>
                                             <td class="py-3.5 px-4"><span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">${c.category}</span></td>
                                             <td class="py-3.5 px-4 font-semibold text-slate-700">${c.hours}</td>
+                                            ${canEdit ? `
                                             <td class="py-3.5 px-4 text-center space-x-1 space-x-reverse">
                                                 <button onclick="openEditCourseModal('${escAttr(c.id)}')" class="text-primary-600 hover:bg-primary-50 p-2 rounded-lg transition"><i class="fa-solid fa-pen-to-square"></i></button>
                                                 <button onclick="deleteCourse('${escAttr(c.id)}')" class="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
-                                            </td>
+                                            </td>` : ''}
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -1319,6 +1673,7 @@
 
         function handleAddCourse(e) {
             e.preventDefault();
+            if (!requireEditPermission()) return;
             const id = document.getElementById('course-code').value.trim();
             const name = document.getElementById('course-name').value.trim();
             const category = document.getElementById('course-category').value;
@@ -1336,8 +1691,9 @@
         }
 
         function openEditCourseModal(id) {
+            if (!requireEditPermission()) return;
             const c = getCourse(id);
-            openGenericModal(currentLang === 'ar' ? 'تعديل الدورة التدريبية' : 'Edit Course', `
+            openGenericModal('تعديل الدورة التدريبية', `
                 <form onsubmit="saveEditedCourse(event, '${escAttr(c.id)}')" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">اسم الدورة</label>
@@ -1360,6 +1716,7 @@
 
         function saveEditedCourse(e, id) {
             e.preventDefault();
+            if (!requireEditPermission()) return;
             const c = appState.courses.find(x => x.id === id);
             if (c) {
                 c.name = document.getElementById('edit-c-name').value.trim();
@@ -1373,6 +1730,7 @@
         }
 
         function deleteCourse(id) {
+            if (!requireEditPermission()) return;
             if (appState.rounds.some(r => r.courseId === id)) {
                 showToast('لا يمكن حذف الدورة لارتباطها بدفعات مسجلة', 'error');
                 return;
@@ -1388,18 +1746,18 @@
             const sheet = workbook.addWorksheet('Courses');
             sheet.views = [{ rightToLeft: currentLang === 'ar' }];
             sheet.columns = [
-                { header: currentLang === 'ar' ? 'كود الدورة' : 'Course Code', key: 'id', width: 18 },
-                { header: currentLang === 'ar' ? 'اسم الدورة' : 'Course Name', key: 'name', width: 35 },
-                { header: currentLang === 'ar' ? 'التصنيف' : 'Category', key: 'category', width: 18 },
-                { header: currentLang === 'ar' ? 'عدد الساعات' : 'Hours', key: 'hours', width: 15 },
-                { header: currentLang === 'ar' ? 'التكلفة' : 'Cost', key: 'cost', width: 15 }
+                { header: 'كود الدورة', key: 'id', width: 18 },
+                { header: 'اسم الدورة', key: 'name', width: 35 },
+                { header: 'التصنيف', key: 'category', width: 18 },
+                { header: 'عدد الساعات', key: 'hours', width: 15 },
+                { header: 'التكلفة', key: 'cost', width: 15 }
             ];
             appState.courses.forEach(c => sheet.addRow({ id: c.id, name: c.name, category: c.category, hours: c.hours, cost: c.costPerRound }));
-            const buffer = await workbook.xlsx.writeBuffer();
-            triggerExcelDownload(buffer, 'Courses_Template.xlsx');
+            triggerExcelDownload(await workbook.xlsx.writeBuffer(), 'Courses_Template.xlsx');
         }
 
         async function handleCoursesExcelUpload(event) {
+            if (!requireEditPermission()) return;
             const file = event.target.files[0];
             if (!file) return;
             try {
@@ -1416,11 +1774,8 @@
                     const hours = Number(getCellText(row.getCell(4)) || 8);
                     const cost = Number(getCellText(row.getCell(5)) || 0);
                     const existing = appState.courses.find(c => c.id === id);
-                    if (existing) {
-                        Object.assign(existing, { name, category, hours, costPerRound: cost });
-                    } else {
-                        appState.courses.push({ id, name, category, hours, costPerRound: cost, description: '' });
-                    }
+                    if (existing) Object.assign(existing, { name, category, hours, costPerRound: cost });
+                    else appState.courses.push({ id, name, category, hours, costPerRound: cost, description: '' });
                     added++;
                 });
                 saveState();
@@ -1432,35 +1787,37 @@
         }
 
         // =========================================================================
-        // 9. VIEW 3: INSTRUCTORS DEFINITION (تعريف المحاضرين وربطهم بالدورات)
+        // 10. VIEW 3: INSTRUCTORS DEFINITION
         // =========================================================================
         function renderInstructorsView() {
+            const canEdit = hasPermission('canEdit');
             return `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    ${canEdit ? `
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm h-fit">
                         <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-user-tie text-primary-600"></i> ${currentLang === 'ar' ? 'إضافة محاضر / مدرب' : 'Add Instructor'}
                         </h3>
                         <form onsubmit="handleAddInstructor(event)" class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'اسم المحاضر' : 'Instructor Name'} *</label>
-                                <input type="text" id="inst-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">اسم المحاضر *</label>
+                                <input type="text" id="inst-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'النوع' : 'Type'}</label>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">النوع</label>
                                     <select id="inst-type" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none">
                                         <option value="خارجي">خارجي / External</option>
                                         <option value="داخلي">داخلي / Internal</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'التخصص' : 'Specialty'}</label>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">التخصص</label>
                                     <input type="text" id="inst-spec" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الدورات التي يقدمها المحاضر' : 'Assigned Courses'}</label>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">الدورات التي يقدمها المحاضر</label>
                                 <div class="max-h-32 overflow-y-auto border border-slate-300 rounded-xl p-2 bg-slate-50 space-y-1">
                                     ${appState.courses.map(c => `
                                         <label class="flex items-center gap-2 p-1.5 rounded bg-white border border-slate-200 text-xs cursor-pointer">
@@ -1471,36 +1828,38 @@
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'رقم الهاتف' : 'Phone'}</label>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">رقم الهاتف</label>
                                 <input type="text" id="inst-phone" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                             </div>
                             <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-sm transition">
-                                <i class="fa-solid fa-plus ml-1"></i> ${currentLang === 'ar' ? 'حفظ المحاضر' : 'Save Instructor'}
+                                <i class="fa-solid fa-plus ml-1"></i> حفظ المحاضر
                             </button>
                         </form>
-                    </div>
+                    </div>` : ''}
 
-                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="${canEdit ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                         <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
-                            <h3 class="font-bold text-lg text-slate-800">${currentLang === 'ar' ? 'قائمة المحاضرين' : 'Instructors List'} (${appState.instructors.length})</h3>
+                            <h3 class="font-bold text-lg text-slate-800">قائمة المحاضرين (${appState.instructors.length})</h3>
                             <div class="flex flex-wrap gap-2">
                                 <button onclick="downloadInstructorsExcelTemplate()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-excel"></i> ${currentLang === 'ar' ? 'تنزيل قالب Excel' : 'Download Excel'}
+                                    <i class="fa-solid fa-file-excel"></i> تنزيل قالب Excel
                                 </button>
+                                ${canEdit ? `
                                 <button onclick="document.getElementById('inst-excel-input').click()" class="px-3.5 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-upload"></i> ${currentLang === 'ar' ? 'رفع من Excel' : 'Upload Excel'}
+                                    <i class="fa-solid fa-upload"></i> رفع من Excel
                                 </button>
                                 <input type="file" id="inst-excel-input" accept=".xlsx,.xls,.csv" onchange="handleInstructorsExcelUpload(event)" class="hidden">
+                                ` : ''}
                             </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-start border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الاسم' : 'Name'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التخصص والنوع' : 'Specialty & Type'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الدورات المرتبطة' : 'Courses'}</th>
-                                        <th class="py-3.5 px-4 font-bold text-center">${currentLang === 'ar' ? 'إجراءات' : 'Actions'}</th>
+                                        <th class="py-3.5 px-4 font-bold">الاسم</th>
+                                        <th class="py-3.5 px-4 font-bold">التخصص والنوع</th>
+                                        <th class="py-3.5 px-4 font-bold">الدورات المرتبطة</th>
+                                        ${canEdit ? `<th class="py-3.5 px-4 font-bold text-center">إجراءات</th>` : ''}
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 text-sm">
@@ -1517,10 +1876,11 @@
                                             <td class="py-3.5 px-4 text-xs text-slate-600">
                                                 ${(ins.courseIds || []).map(cid => `<span class="inline-block bg-slate-100 px-2 py-0.5 rounded m-0.5">${getCourse(cid).name}</span>`).join('') || '-'}
                                             </td>
+                                            ${canEdit ? `
                                             <td class="py-3.5 px-4 text-center space-x-1 space-x-reverse">
                                                 <button onclick="openEditInstructorModal('${escAttr(ins.id)}')" class="text-primary-600 hover:bg-primary-50 p-2 rounded-lg transition"><i class="fa-solid fa-pen-to-square"></i></button>
                                                 <button onclick="deleteInstructor('${escAttr(ins.id)}')" class="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
-                                            </td>
+                                            </td>` : ''}
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -1533,6 +1893,7 @@
 
         function handleAddInstructor(e) {
             e.preventDefault();
+            if (!requireEditPermission()) return;
             const id = 'INS-' + String(Date.now()).slice(-4);
             const name = document.getElementById('inst-name').value.trim();
             const type = document.getElementById('inst-type').value;
@@ -1547,8 +1908,9 @@
         }
 
         function openEditInstructorModal(id) {
+            if (!requireEditPermission()) return;
             const ins = getInstructor(id);
-            openGenericModal(currentLang === 'ar' ? 'تعديل بيانات المحاضر' : 'Edit Instructor', `
+            openGenericModal('تعديل بيانات المحاضر', `
                 <form onsubmit="saveEditedInstructor(event, '${escAttr(ins.id)}')" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">الاسم</label>
@@ -1582,6 +1944,7 @@
 
         function saveEditedInstructor(e, id) {
             e.preventDefault();
+            if (!requireEditPermission()) return;
             const ins = appState.instructors.find(x => x.id === id);
             if (ins) {
                 ins.name = document.getElementById('edit-ins-name').value.trim();
@@ -1596,6 +1959,7 @@
         }
 
         function deleteInstructor(id) {
+            if (!requireEditPermission()) return;
             appState.instructors = appState.instructors.filter(i => i.id !== id);
             saveState();
             showToast('تم حذف المحاضر', 'info');
@@ -1607,17 +1971,17 @@
             const sheet = workbook.addWorksheet('Instructors');
             sheet.views = [{ rightToLeft: currentLang === 'ar' }];
             sheet.columns = [
-                { header: currentLang === 'ar' ? 'اسم المحاضر' : 'Instructor Name', key: 'name', width: 30 },
-                { header: currentLang === 'ar' ? 'النوع' : 'Type', key: 'type', width: 15 },
-                { header: currentLang === 'ar' ? 'التخصص' : 'Specialty', key: 'specialty', width: 28 },
-                { header: currentLang === 'ar' ? 'الهاتف' : 'Phone', key: 'phone', width: 20 }
+                { header: 'اسم المحاضر', key: 'name', width: 30 },
+                { header: 'النوع', key: 'type', width: 15 },
+                { header: 'التخصص', key: 'specialty', width: 28 },
+                { header: 'الهاتف', key: 'phone', width: 20 }
             ];
             appState.instructors.forEach(i => sheet.addRow({ name: i.name, type: i.type, specialty: i.specialty, phone: i.phone }));
-            const buffer = await workbook.xlsx.writeBuffer();
-            triggerExcelDownload(buffer, 'Instructors_Template.xlsx');
+            triggerExcelDownload(await workbook.xlsx.writeBuffer(), 'Instructors_Template.xlsx');
         }
 
         async function handleInstructorsExcelUpload(event) {
+            if (!requireEditPermission()) return;
             const file = event.target.files[0];
             if (!file) return;
             try {
@@ -1633,11 +1997,8 @@
                     const specialty = getCellText(row.getCell(3)) || '-';
                     const phone = getCellText(row.getCell(4));
                     const existing = appState.instructors.find(i => i.name === name);
-                    if (existing) {
-                        Object.assign(existing, { type, specialty, phone });
-                    } else {
-                        appState.instructors.push({ id: 'INS-' + String(Date.now() + rowNumber).slice(-4), name, type, specialty, courseIds: [], phone, email: '' });
-                    }
+                    if (existing) Object.assign(existing, { type, specialty, phone });
+                    else appState.instructors.push({ id: 'INS-' + String(Date.now() + rowNumber).slice(-4), name, type, specialty, courseIds: [], phone, email: '' });
                     added++;
                 });
                 saveState();
@@ -1649,9 +2010,10 @@
         }
 
         // =========================================================================
-        // 10. VIEW 4: TRAINEES DEFINITION (تعريف المتدربين + كود الموظف + Excel)
+        // 11. VIEW 4: TRAINEES DEFINITION
         // =========================================================================
         function renderTraineesView() {
+            const canEdit = hasPermission('canEdit');
             const filtered = appState.trainees.filter(t => {
                 const q = traineeSearchQuery.toLowerCase();
                 return !q || t.id.toLowerCase().includes(q) || t.name.toLowerCase().includes(q) || (t.department || '').toLowerCase().includes(q) || (t.branch || '').toLowerCase().includes(q);
@@ -1659,68 +2021,71 @@
 
             return `
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    ${canEdit ? `
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm h-fit">
                         <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-user-plus text-primary-600"></i> ${currentLang === 'ar' ? 'تعريف متدرب (موظف)' : 'Add Trainee'}
+                            <i class="fa-solid fa-user-plus text-primary-600"></i> تعريف متدرب (موظف)
                         </h3>
                         <form onsubmit="handleAddTrainee(event)" class="space-y-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'كود الموظف' : 'Employee Code'} *</label>
-                                <input type="text" id="trn-code" required placeholder="EMP-1001" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-primary-500">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">كود الموظف *</label>
+                                <input type="text" id="trn-code" required placeholder="EMP-1001" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'اسم الموظف بالكامل' : 'Full Name'} *</label>
-                                <input type="text" id="trn-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                                <label class="block text-xs font-bold text-slate-700 mb-1">اسم الموظف بالكامل *</label>
+                                <input type="text" id="trn-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الإدارة' : 'Department'}</label>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">الإدارة</label>
                                     <input type="text" id="trn-dept" required placeholder="المبيعات" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الفرع' : 'Branch'}</label>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">الفرع</label>
                                     <input type="text" id="trn-branch" required placeholder="الفرع الرئيسي" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الوظيفة' : 'Job Title'}</label>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">الوظيفة</label>
                                 <input type="text" id="trn-title" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'رقم الواتساب' : 'WhatsApp Number'}</label>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">رقم الواتساب</label>
                                 <input type="text" id="trn-phone" placeholder="201001234567" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none" dir="ltr">
                             </div>
                             <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-sm transition">
-                                <i class="fa-solid fa-plus ml-1"></i> ${currentLang === 'ar' ? 'إضافة المتدرب' : 'Save Trainee'}
+                                <i class="fa-solid fa-plus ml-1"></i> إضافة المتدرب
                             </button>
                         </form>
-                    </div>
+                    </div>` : ''}
 
-                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="${canEdit ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                         <div class="p-6 border-b border-slate-100 space-y-3">
                             <div class="flex flex-wrap items-center justify-between gap-3">
-                                <h3 class="font-bold text-lg text-slate-800">${currentLang === 'ar' ? 'سجل المتدربين' : 'Trainees Registry'} (${appState.trainees.length})</h3>
+                                <h3 class="font-bold text-lg text-slate-800">سجل المتدربين (${appState.trainees.length})</h3>
                                 <div class="flex flex-wrap gap-2">
                                     <button onclick="downloadTraineesExcelTemplate()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
-                                        <i class="fa-solid fa-file-excel"></i> ${currentLang === 'ar' ? 'تنزيل قالب Excel' : 'Download Excel'}
+                                        <i class="fa-solid fa-file-excel"></i> تنزيل قالب Excel
                                     </button>
+                                    ${canEdit ? `
                                     <button onclick="document.getElementById('trn-excel-input').click()" class="px-3.5 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 border border-primary-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
-                                        <i class="fa-solid fa-upload"></i> ${currentLang === 'ar' ? 'رفع من Excel' : 'Upload Excel'}
+                                        <i class="fa-solid fa-upload"></i> رفع من Excel
                                     </button>
                                     <input type="file" id="trn-excel-input" accept=".xlsx,.xls,.csv" onchange="handleTraineesExcelUpload(event)" class="hidden">
+                                    ` : ''}
                                 </div>
                             </div>
-                            <input type="text" value="${escAttr(traineeSearchQuery)}" oninput="traineeSearchQuery = this.value; renderCurrentView();" placeholder="${currentLang === 'ar' ? 'بحث بكود الموظف، الاسم، الإدارة، أو الفرع...' : 'Search by code, name, department, or branch...'}" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-xs outline-none focus:ring-2 focus:ring-primary-500">
+                            <input type="text" value="${escAttr(traineeSearchQuery)}" oninput="traineeSearchQuery = this.value; renderCurrentView();" placeholder="بحث بكود الموظف، الاسم، الإدارة، أو الفرع..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-xs outline-none">
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-start border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'كود الموظف' : 'Code'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الاسم والوظيفة' : 'Name & Title'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الإدارة والفرع' : 'Dept & Branch'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'واتساب' : 'WhatsApp'}</th>
-                                        <th class="py-3.5 px-4 font-bold text-center">${currentLang === 'ar' ? 'إجراءات' : 'Actions'}</th>
+                                        <th class="py-3.5 px-4 font-bold">كود الموظف</th>
+                                        <th class="py-3.5 px-4 font-bold">الاسم والوظيفة</th>
+                                        <th class="py-3.5 px-4 font-bold">الإدارة والفرع</th>
+                                        <th class="py-3.5 px-4 font-bold">واتساب</th>
+                                        ${canEdit ? `<th class="py-3.5 px-4 font-bold text-center">إجراءات</th>` : ''}
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 text-sm">
@@ -1736,10 +2101,11 @@
                                                 <div class="text-xs text-slate-400">${tr.branch || '-'}</div>
                                             </td>
                                             <td class="py-3.5 px-4 font-mono text-xs text-emerald-700" dir="ltr">${tr.phone || '-'}</td>
+                                            ${canEdit ? `
                                             <td class="py-3.5 px-4 text-center space-x-1 space-x-reverse">
                                                 <button onclick="openEditTraineeModal('${escAttr(tr.id)}')" class="text-primary-600 hover:bg-primary-50 p-2 rounded-lg transition"><i class="fa-solid fa-pen-to-square"></i></button>
                                                 <button onclick="deleteTrainee('${escAttr(tr.id)}')" class="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
-                                            </td>
+                                            </td>` : ''}
                                         </tr>
                                     `).join('')}
                                 </tbody>
@@ -1752,6 +2118,7 @@
 
         function handleAddTrainee(e) {
             e.preventDefault();
+            if (!requireEditPermission()) return;
             const id = document.getElementById('trn-code').value.trim();
             const name = document.getElementById('trn-name').value.trim();
             const department = document.getElementById('trn-dept').value.trim();
@@ -1770,8 +2137,9 @@
         }
 
         function openEditTraineeModal(id) {
+            if (!requireEditPermission()) return;
             const tr = getTrainee(id);
-            openGenericModal(currentLang === 'ar' ? 'تعديل بيانات المتدرب' : 'Edit Trainee', `
+            openGenericModal('تعديل بيانات المتدرب', `
                 <form onsubmit="saveEditedTrainee(event, '${escAttr(tr.id)}')" class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -1810,6 +2178,7 @@
 
         function saveEditedTrainee(e, oldId) {
             e.preventDefault();
+            if (!requireEditPermission()) return;
             const tr = appState.trainees.find(x => x.id === oldId);
             if (!tr) return;
             const newId = document.getElementById('edit-tr-code').value.trim();
@@ -1840,6 +2209,7 @@
         }
 
         function deleteTrainee(id) {
+            if (!requireEditPermission()) return;
             appState.trainees = appState.trainees.filter(t => t.id !== id);
             saveState();
             showToast('تم حذف المتدرب', 'info');
@@ -1851,19 +2221,19 @@
             const sheet = workbook.addWorksheet('Trainees');
             sheet.views = [{ rightToLeft: currentLang === 'ar' }];
             sheet.columns = [
-                { header: currentLang === 'ar' ? 'كود الموظف' : 'Employee Code', key: 'id', width: 18 },
-                { header: currentLang === 'ar' ? 'اسم المتدرب' : 'Trainee Name', key: 'name', width: 30 },
-                { header: currentLang === 'ar' ? 'الوظيفة' : 'Job Title', key: 'jobTitle', width: 22 },
-                { header: currentLang === 'ar' ? 'الإدارة' : 'Department', key: 'department', width: 20 },
-                { header: currentLang === 'ar' ? 'الفرع' : 'Branch', key: 'branch', width: 22 },
-                { header: currentLang === 'ar' ? 'رقم الواتساب' : 'WhatsApp', key: 'phone', width: 18 }
+                { header: 'كود الموظف', key: 'id', width: 18 },
+                { header: 'اسم المتدرب', key: 'name', width: 30 },
+                { header: 'الوظيفة', key: 'jobTitle', width: 22 },
+                { header: 'الإدارة', key: 'department', width: 20 },
+                { header: 'الفرع', key: 'branch', width: 22 },
+                { header: 'رقم الواتساب', key: 'phone', width: 18 }
             ];
             appState.trainees.forEach(tr => sheet.addRow(tr));
-            const buffer = await workbook.xlsx.writeBuffer();
-            triggerExcelDownload(buffer, 'Trainees_Template.xlsx');
+            triggerExcelDownload(await workbook.xlsx.writeBuffer(), 'Trainees_Template.xlsx');
         }
 
         async function handleTraineesExcelUpload(event) {
+            if (!requireEditPermission()) return;
             const file = event.target.files[0];
             if (!file) return;
             try {
@@ -1881,11 +2251,8 @@
                     const branch = getCellText(row.getCell(5)) || 'الفرع الرئيسي';
                     const phone = getCellText(row.getCell(6));
                     const existing = appState.trainees.find(t => t.id === id);
-                    if (existing) {
-                        Object.assign(existing, { name, jobTitle, department, branch, phone });
-                    } else {
-                        appState.trainees.push({ id, name, jobTitle, department, branch, phone });
-                    }
+                    if (existing) Object.assign(existing, { name, jobTitle, department, branch, phone });
+                    else appState.trainees.push({ id, name, jobTitle, department, branch, phone });
                     count++;
                 });
                 saveState();
@@ -1897,27 +2264,31 @@
         }
 
         // =========================================================================
-        // 11. VIEW 5: COURSE SETUP / ROUNDS (إعداد الدورات + ExcelJS Drop-down TRUE/FALSE)
+        // 12. VIEW 5: COURSE SETUP / ROUNDS
         // =========================================================================
         function renderRoundsView() {
+            const canEdit = hasPermission('canEdit');
             return `
                 <div class="space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div>
-                            <h3 class="font-bold text-lg text-slate-800">${currentLang === 'ar' ? 'إدارة الدفعات التدريبية وتسكين المتدربين' : 'Course Setup & Trainee Enrollment'}</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">${currentLang === 'ar' ? 'يمكنك إعداد الدورة يدوياً مع اختيار أكثر من محاضر، أو تنزيل شيت الإكسل بقوائم منسدلة (TRUE / FALSE)' : 'Setup manually with multi-instructors or use Excel matrix with TRUE/FALSE dropdowns'}</p>
+                            <h3 class="font-bold text-lg text-slate-800">إدارة الدفعات التدريبية وتسكين المتدربين</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">إعداد الدفعات واختيار المحاضرين وتسكين المتدربين يدوياً أو عبر شيت المصفوفة</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2.5">
+                            ${canEdit ? `
                             <button onclick="openRoundSetupModal()" class="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-2">
-                                <i class="fa-solid fa-plus"></i> ${currentLang === 'ar' ? 'إضافة جديد (إعداد دورة)' : 'Add New Round'}
-                            </button>
+                                <i class="fa-solid fa-plus"></i> إضافة جديد (إعداد دورة)
+                            </button>` : ''}
                             <button onclick="downloadCourseMatrixExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-2">
-                                <i class="fa-solid fa-file-excel"></i> ${currentLang === 'ar' ? 'تنزيل شيت المصفوفة (TRUE/FALSE)' : 'Download Matrix Excel'}
+                                <i class="fa-solid fa-file-excel"></i> تنزيل شيت المصفوفة (TRUE/FALSE)
                             </button>
+                            ${canEdit ? `
                             <button onclick="document.getElementById('matrix-excel-input').click()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-2">
-                                <i class="fa-solid fa-upload"></i> ${currentLang === 'ar' ? 'رفع شيت المصفوفة' : 'Upload Matrix Excel'}
+                                <i class="fa-solid fa-upload"></i> رفع شيت المصفوفة
                             </button>
                             <input type="file" id="matrix-excel-input" accept=".xlsx,.xls" onchange="handleMatrixExcelUpload(event)" class="hidden">
+                            ` : ''}
                         </div>
                     </div>
 
@@ -1926,11 +2297,11 @@
                             <table class="w-full text-start border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الدورة التدريبية والدفعة' : 'Course & Batch'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'المحاضرون' : 'Instructors'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التاريخ والمكان' : 'Dates & Location'}</th>
-                                        <th class="py-3.5 px-4 font-bold text-center">${currentLang === 'ar' ? 'المتدربون' : 'Trainees'}</th>
-                                        <th class="py-3.5 px-4 font-bold text-center">${currentLang === 'ar' ? 'إجراءات' : 'Actions'}</th>
+                                        <th class="py-3.5 px-4 font-bold">الدورة التدريبية والدفعة</th>
+                                        <th class="py-3.5 px-4 font-bold">المحاضرون</th>
+                                        <th class="py-3.5 px-4 font-bold">التاريخ والمكان</th>
+                                        <th class="py-3.5 px-4 font-bold text-center">المتدربون</th>
+                                        <th class="py-3.5 px-4 font-bold text-center">إجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 text-sm">
@@ -1948,19 +2319,20 @@
                                                     <div>${r.location}</div>
                                                 </td>
                                                 <td class="py-3.5 px-4 text-center">
-                                                    <span class="px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-bold">${r.traineeIds.length} ${currentLang === 'ar' ? 'متدرب' : 'trainees'}</span>
+                                                    <span class="px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-bold">${r.traineeIds.length} متدرب</span>
                                                 </td>
                                                 <td class="py-3.5 px-4 text-center">
                                                     <div class="inline-flex items-center gap-1.5">
-                                                        <button onclick="openViewRoundTraineesModal('${escAttr(r.id)}')" class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg text-xs font-bold transition" title="عرض المتدربين الفعليين">
-                                                            <i class="fa-solid fa-eye ml-1"></i> ${currentLang === 'ar' ? 'عرض' : 'View'}
+                                                        <button onclick="openViewRoundTraineesModal('${escAttr(r.id)}')" class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg text-xs font-bold transition">
+                                                            <i class="fa-solid fa-eye ml-1"></i> عرض
                                                         </button>
+                                                        ${canEdit ? `
                                                         <button onclick="openRoundSetupModal('${escAttr(r.id)}')" class="px-2.5 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg text-xs font-bold transition">
                                                             <i class="fa-solid fa-pen"></i>
                                                         </button>
                                                         <button onclick="deleteRound('${escAttr(r.id)}')" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-xs font-bold transition">
                                                             <i class="fa-solid fa-trash-can"></i>
-                                                        </button>
+                                                        </button>` : ''}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -2001,7 +2373,7 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs">
                         <div><span class="text-slate-400 block">المحاضرون:</span><strong>${getRoundInstructorsNames(round)}</strong></div>
                         <div><span class="text-slate-400 block">التاريخ:</span><strong>${round.startDate} ➔ ${round.endDate}</strong></div>
-                        <div><span class="text-slate-400 block">إجمالي المتدربين الفعليين:</span><strong class="text-primary-700">${round.traineeIds.length} متدرب</strong></div>
+                        <div><span class="text-slate-400 block">إجمالي المتدربين:</span><strong class="text-primary-700">${round.traineeIds.length} متدرب</strong></div>
                     </div>
                     <div class="max-h-80 overflow-y-auto border border-slate-200 rounded-xl">
                         <table class="w-full text-start border-collapse">
@@ -2023,12 +2395,13 @@
         }
 
         function openRoundSetupModal(editRoundId = null) {
+            if (!requireEditPermission()) return;
             const round = editRoundId ? appState.rounds.find(r => r.id === editRoundId) : null;
             const selectedCourseId = round ? round.courseId : (appState.courses[0]?.id || '');
             const selectedInstIds = round ? (round.instructorIds || []) : [];
             const selectedTrnIds = round ? (round.traineeIds || []) : [];
 
-            openGenericModal(round ? (currentLang === 'ar' ? 'تعديل إعداد الدورة التدريبية' : 'Edit Training Round') : (currentLang === 'ar' ? 'إعداد دفعة تدريبية جديدة' : 'New Training Round'), `
+            openGenericModal(round ? 'تعديل إعداد الدورة التدريبية' : 'إعداد دفعة تدريبية جديدة', `
                 <form onsubmit="saveRoundSetup(event, '${escAttr(editRoundId || '')}')" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
@@ -2108,6 +2481,7 @@
 
         function saveRoundSetup(e, editRoundId) {
             e.preventDefault();
+            if (!requireEditPermission()) return;
             const courseId = document.getElementById('modal-r-course').value;
             const batchName = document.getElementById('modal-r-batch').value.trim();
             const instructorIds = Array.from(document.querySelectorAll('input[name="modalRoundInstructors"]:checked')).map(cb => cb.value);
@@ -2116,20 +2490,14 @@
             const location = document.getElementById('modal-r-loc').value.trim();
             const traineeIds = Array.from(document.querySelectorAll('.modal-trn-cb:checked')).map(cb => cb.value);
 
-            if (instructorIds.length === 0) {
-                showToast('يرجى اختيار محاضر واحد على الأقل', 'error');
-                return;
-            }
-            if (traineeIds.length === 0) {
-                showToast('يرجى اختيار متدرب واحد على الأقل', 'error');
+            if (instructorIds.length === 0 || traineeIds.length === 0) {
+                showToast('يرجى اختيار محاضر واحد ومتدرب واحد على الأقل', 'error');
                 return;
             }
 
             if (editRoundId) {
                 const r = appState.rounds.find(x => x.id === editRoundId);
-                if (r) {
-                    Object.assign(r, { courseId, batchName, instructorIds, startDate, endDate, location, traineeIds });
-                }
+                if (r) Object.assign(r, { courseId, batchName, instructorIds, startDate, endDate, location, traineeIds });
             } else {
                 appState.rounds.unshift({
                     id: 'RND-' + new Date().getFullYear() + '-' + String(appState.rounds.length + 1).padStart(2, '0'),
@@ -2144,6 +2512,7 @@
         }
 
         function deleteRound(id) {
+            if (!requireEditPermission()) return;
             appState.rounds = appState.rounds.filter(r => r.id !== id);
             saveState();
             showToast('تم حذف الدفعة', 'info');
@@ -2152,7 +2521,7 @@
 
         async function downloadCourseMatrixExcel() {
             if (appState.courses.length === 0 || appState.trainees.length === 0) {
-                showToast('يرجى تعريف الدورات والمتدربين أولاً قبل تنزيل الشيت', 'error');
+                showToast('يرجى تعريف الدورات والمتدربين أولاً', 'error');
                 return;
             }
             try {
@@ -2160,35 +2529,20 @@
                 const sheet = workbook.addWorksheet('Training_Matrix');
                 const listsSheet = workbook.addWorksheet('Dropdown_Lists');
                 listsSheet.state = 'hidden';
-
                 sheet.views = [{ rightToLeft: currentLang === 'ar' }];
 
-                appState.instructors.forEach((ins, idx) => {
-                    listsSheet.getCell(`A${idx + 1}`).value = ins.name;
-                });
+                appState.instructors.forEach((ins, idx) => { listsSheet.getCell(`A${idx + 1}`).value = ins.name; });
                 const instCount = Math.max(1, appState.instructors.length);
 
-                const headers = [
-                    currentLang === 'ar' ? 'كود الموظف' : 'Employee Code',
-                    currentLang === 'ar' ? 'اسم المتدرب' : 'Trainee Name',
-                    currentLang === 'ar' ? 'الوظيفة' : 'Job Title',
-                    currentLang === 'ar' ? 'الإدارة' : 'Department',
-                    currentLang === 'ar' ? 'الفرع' : 'Branch',
-                    currentLang === 'ar' ? 'المحاضر الرئيسي' : 'Primary Instructor',
-                    currentLang === 'ar' ? 'محاضر إضافي (اختياري)' : 'Secondary Instructor'
-                ];
+                const headers = ['كود الموظف', 'اسم المتدرب', 'الوظيفة', 'الإدارة', 'الفرع', 'المحاضر الرئيسي', 'محاضر إضافي'];
                 appState.courses.forEach(c => headers.push(`[${c.id}] ${c.name}`));
 
                 const headerRow = sheet.addRow(headers);
                 headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
                 headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
-
-                sheet.columns.forEach((col, i) => {
-                    col.width = i === 0 ? 16 : (i === 1 ? 28 : 22);
-                });
+                sheet.columns.forEach((col, i) => { col.width = i === 0 ? 16 : (i === 1 ? 28 : 22); });
 
                 const defaultInst1 = appState.instructors[0]?.name || '';
-
                 appState.trainees.forEach(tr => {
                     const rowValues = [tr.id, tr.name, tr.jobTitle, tr.department, tr.branch || '', defaultInst1, ''];
                     appState.courses.forEach(c => {
@@ -2196,42 +2550,24 @@
                         rowValues.push(isEnrolled ? 'TRUE' : 'FALSE');
                     });
                     const row = sheet.addRow(rowValues);
-
                     if (appState.instructors.length > 0) {
-                        row.getCell(6).dataValidation = {
-                            type: 'list',
-                            allowBlank: true,
-                            formulae: [`=Dropdown_Lists!$A$1:$A$${instCount}`]
-                        };
-                        row.getCell(7).dataValidation = {
-                            type: 'list',
-                            allowBlank: true,
-                            formulae: [`=Dropdown_Lists!$A$1:$A$${instCount}`]
-                        };
+                        row.getCell(6).dataValidation = { type: 'list', allowBlank: true, formulae: [`=Dropdown_Lists!$A$1:$A$${instCount}`] };
+                        row.getCell(7).dataValidation = { type: 'list', allowBlank: true, formulae: [`=Dropdown_Lists!$A$1:$A$${instCount}`] };
                     }
-
                     for (let colIdx = 8; colIdx <= headers.length; colIdx++) {
-                        row.getCell(colIdx).dataValidation = {
-                            type: 'list',
-                            allowBlank: false,
-                            formulae: ['"TRUE,FALSE"'],
-                            showErrorMessage: true,
-                            errorTitle: 'قيمة غير صحيحة',
-                            error: 'يرجى الاختيار من القائمة المنسدلة: TRUE أو FALSE'
-                        };
+                        row.getCell(colIdx).dataValidation = { type: 'list', allowBlank: false, formulae: ['"TRUE,FALSE"'] };
                     }
                 });
 
-                const buffer = await workbook.xlsx.writeBuffer();
-                triggerExcelDownload(buffer, 'Course_Enrollment_Matrix.xlsx');
-                showToast(currentLang === 'ar' ? 'تم تنزيل شيت الإكسل بالقوائم المنسدلة (TRUE / FALSE)' : 'Matrix Excel downloaded with TRUE/FALSE dropdowns', 'success');
+                triggerExcelDownload(await workbook.xlsx.writeBuffer(), 'Course_Enrollment_Matrix.xlsx');
+                showToast('تم تنزيل شيت الإكسل بالقوائم المنسدلة (TRUE / FALSE)', 'success');
             } catch (err) {
-                console.error(err);
                 showToast('حدث خطأ أثناء إنشاء شيت الإكسل', 'error');
             }
         }
 
         async function handleMatrixExcelUpload(event) {
+            if (!requireEditPermission()) return;
             const file = event.target.files[0];
             if (!file) return;
             try {
@@ -2246,9 +2582,7 @@
                         const text = getCellText(cell);
                         const match = text.match(/^\[([^\]]+)\]/);
                         const courseId = match ? match[1] : (appState.courses.find(c => text.includes(c.name))?.id);
-                        if (courseId) {
-                            courseColumns.push({ colNumber, courseId });
-                        }
+                        if (courseId) courseColumns.push({ colNumber, courseId });
                     }
                 });
 
@@ -2266,10 +2600,8 @@
                     const trainee = appState.trainees.find(t => t.id === empCode) || appState.trainees.find(t => t.name === empName);
                     if (!trainee) return;
 
-                    const inst1Name = getCellText(row.getCell(6));
-                    const inst2Name = getCellText(row.getCell(7));
-                    const inst1 = appState.instructors.find(i => i.name === inst1Name);
-                    const inst2 = appState.instructors.find(i => i.name === inst2Name);
+                    const inst1 = appState.instructors.find(i => i.name === getCellText(row.getCell(6)));
+                    const inst2 = appState.instructors.find(i => i.name === getCellText(row.getCell(7)));
 
                     courseColumns.forEach(cc => {
                         const val = getCellText(row.getCell(cc.colNumber)).toUpperCase();
@@ -2297,15 +2629,8 @@
                         appState.rounds.unshift({
                             id: 'RND-' + new Date().getFullYear() + '-' + String(appState.rounds.length + 1).padStart(2, '0'),
                             batchName: 'دفعة مستوردة - ' + today,
-                            courseId,
-                            instructorIds: finalInstIds,
-                            startDate: today,
-                            endDate: today,
-                            location: 'قاعة التدريب',
-                            status: 'قيد التنفيذ',
-                            traineeIds: trnIds,
-                            attendance: {},
-                            evaluations: []
+                            courseId, instructorIds: finalInstIds, startDate: today, endDate: today,
+                            location: 'قاعة التدريب', status: 'قيد التنفيذ', traineeIds: trnIds, attendance: {}, evaluations: []
                         });
                     }
                     updatedRounds++;
@@ -2315,7 +2640,6 @@
                 showToast(`تم تحديث تسكين المتدربين في ${updatedRounds} دورة بنجاح!`, 'success');
                 renderCurrentView();
             } catch (err) {
-                console.error(err);
                 showToast('حدث خطأ أثناء معالجة شيت المصفوفة', 'error');
             }
         }
@@ -2332,38 +2656,35 @@
         }
 
         // =========================================================================
-        // 12. VIEW 6: ATTENDANCE CHECKLIST (تسجيل الحضور والغياب بالفلتر)
+        // 13. VIEW 6: ATTENDANCE CHECKLIST
         // =========================================================================
         function renderAttendanceView() {
-            if (appState.rounds.length === 0) {
-                return `<div class="bg-white p-8 rounded-2xl text-center text-slate-500">لا توجد دفعات تدريبية مجدولة حالياً.</div>`;
-            }
-
+            if (appState.rounds.length === 0) return `<div class="bg-white p-8 rounded-2xl text-center text-slate-500">لا توجد دفعات تدريبية مجدولة حالياً.</div>`;
             if (!selectedRoundForAttendance || !appState.rounds.some(r => r.id === selectedRoundForAttendance)) {
                 selectedRoundForAttendance = appState.rounds[0].id;
             }
             const round = appState.rounds.find(r => r.id === selectedRoundForAttendance);
             const course = getCourse(round.courseId);
             const stats = calcRoundStats(round);
+            const canEdit = hasPermission('canEdit');
 
             return `
                 <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex-1">
-                        <label class="block text-xs font-bold text-slate-500 mb-1.5">${currentLang === 'ar' ? 'اختر الدورة التدريبية وتاريخ الانعقاد:' : 'Select Course & Date:'}</label>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5">اختر الدورة التدريبية وتاريخ الانعقاد:</label>
                         <select onchange="selectedRoundForAttendance = this.value; renderCurrentView();" class="w-full md:max-w-xl rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 outline-none">
-                            ${appState.rounds.map(r => {
-                                const c = getCourse(r.courseId);
-                                return `<option value="${escAttr(r.id)}" ${r.id === round.id ? 'selected' : ''}>${c.name} — (${r.batchName}) [${r.startDate}]</option>`;
-                            }).join('')}
+                            ${appState.rounds.map(r => `<option value="${escAttr(r.id)}" ${r.id === round.id ? 'selected' : ''}>${getCourse(r.courseId).name} — (${r.batchName}) [${r.startDate}]</option>`).join('')}
                         </select>
                     </div>
                     <div class="flex flex-wrap items-center gap-2.5">
+                        ${canEdit ? `
                         <button onclick="markAllPresent('${escAttr(round.id)}')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition">
-                            <i class="fa-solid fa-check-double ml-1"></i> ${currentLang === 'ar' ? 'تحضير الجميع' : 'Mark All Present'}
-                        </button>
+                            <i class="fa-solid fa-check-double ml-1"></i> تحضير الجميع
+                        </button>` : ''}
+                        ${hasPermission('reports') ? `
                         <button onclick="selectedRoundForReport = '${escAttr(round.id)}'; navigate('reports');" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl shadow-sm transition">
-                            <i class="fa-solid fa-file-lines ml-1"></i> ${currentLang === 'ar' ? 'التقرير' : 'Report'}
-                        </button>
+                            <i class="fa-solid fa-file-lines ml-1"></i> التقرير
+                        </button>` : ''}
                     </div>
                 </div>
 
@@ -2403,13 +2724,13 @@
                                             </td>
                                             <td class="py-3.5 px-4 text-center">
                                                 <div class="inline-flex gap-1.5">
-                                                    <button onclick="updateTraineeAttendance('${escAttr(round.id)}', '${escAttr(tid)}', 'present')" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${st === 'present' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-600 border-slate-200'}">حاضر</button>
-                                                    <button onclick="updateTraineeAttendance('${escAttr(round.id)}', '${escAttr(tid)}', 'absent')" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${st === 'absent' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 border-slate-200'}">غائب</button>
-                                                    <button onclick="updateTraineeAttendance('${escAttr(round.id)}', '${escAttr(tid)}', 'excused')" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${st === 'excused' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'}">معتذر</button>
+                                                    <button ${canEdit ? '' : 'disabled'} onclick="updateTraineeAttendance('${escAttr(round.id)}', '${escAttr(tid)}', 'present')" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${st === 'present' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-600 border-slate-200'}">حاضر</button>
+                                                    <button ${canEdit ? '' : 'disabled'} onclick="updateTraineeAttendance('${escAttr(round.id)}', '${escAttr(tid)}', 'absent')" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${st === 'absent' ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 border-slate-200'}">غائب</button>
+                                                    <button ${canEdit ? '' : 'disabled'} onclick="updateTraineeAttendance('${escAttr(round.id)}', '${escAttr(tid)}', 'excused')" class="px-3 py-1.5 rounded-lg text-xs font-bold border ${st === 'excused' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-slate-600 border-slate-200'}">معتذر</button>
                                                 </div>
                                             </td>
                                             <td class="py-3.5 px-4">
-                                                <input type="text" value="${escAttr(note)}" onchange="updateAttendanceNote('${escAttr(round.id)}', '${escAttr(tid)}', this.value)" placeholder="ملاحظة..." class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none">
+                                                <input type="text" ${canEdit ? '' : 'readonly'} value="${escAttr(note)}" onchange="updateAttendanceNote('${escAttr(round.id)}', '${escAttr(tid)}', this.value)" placeholder="ملاحظة..." class="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs outline-none">
                                             </td>
                                         </tr>
                                     `;
@@ -2422,6 +2743,7 @@
         }
 
         function updateTraineeAttendance(roundId, traineeId, status) {
+            if (!requireEditPermission()) return;
             const round = appState.rounds.find(r => r.id === roundId);
             if (!round) return;
             if (!round.attendance[traineeId]) round.attendance[traineeId] = { note: '' };
@@ -2431,6 +2753,7 @@
         }
 
         function updateAttendanceNote(roundId, traineeId, note) {
+            if (!requireEditPermission()) return;
             const round = appState.rounds.find(r => r.id === roundId);
             if (!round) return;
             if (!round.attendance[traineeId]) round.attendance[traineeId] = { status: 'pending' };
@@ -2440,6 +2763,7 @@
         }
 
         function markAllPresent(roundId) {
+            if (!requireEditPermission()) return;
             const round = appState.rounds.find(r => r.id === roundId);
             if (!round) return;
             round.traineeIds.forEach(tid => {
@@ -2452,7 +2776,7 @@
         }
 
         // =========================================================================
-        // 13. VIEW 7: EVALUATION & WHATSAPP FORM
+        // 14. VIEW 7: EVALUATION & WHATSAPP FORM
         // =========================================================================
         function renderEvaluationView() {
             if (appState.rounds.length === 0) return `<div class="bg-white p-8 rounded-2xl text-center text-slate-500">لا توجد دفعات متاحة للتقييم.</div>`;
@@ -2564,12 +2888,10 @@
         }
 
         // =========================================================================
-        // 14. VIEW 8: EMPLOYEE ANNUAL TRAINING RECORD (سجل التدريب للموظفين)
+        // 15. VIEW 8: EMPLOYEE ANNUAL TRAINING RECORD
         // =========================================================================
         function renderTrainingRecordView() {
-            if (appState.trainees.length === 0) {
-                return `<div class="bg-white p-8 rounded-2xl text-center text-slate-500">لا يوجد موظفون مسجلون في النظام بعد.</div>`;
-            }
+            if (appState.trainees.length === 0) return `<div class="bg-white p-8 rounded-2xl text-center text-slate-500">لا يوجد موظفون مسجلون في النظام بعد.</div>`;
 
             const matchingTrainees = appState.trainees.filter(tr => {
                 const q = recordSearchQuery.toLowerCase();
@@ -2593,8 +2915,7 @@
 
             let attendedCount = 0, totalHours = 0;
             empRounds.forEach(r => {
-                const st = r.attendance[emp.id]?.status;
-                if (st === 'present') {
+                if (r.attendance[emp.id]?.status === 'present') {
                     attendedCount++;
                     totalHours += Number(getCourse(r.courseId).hours || 0);
                 }
@@ -2604,29 +2925,29 @@
                 <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4 no-print">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">${currentLang === 'ar' ? 'بحث بالكود أو الاسم:' : 'Search Employee:'}</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">بحث بالكود أو الاسم:</label>
                             <input type="text" value="${escAttr(recordSearchQuery)}" oninput="recordSearchQuery = this.value; renderCurrentView();" placeholder="EMP-201..." class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">${currentLang === 'ar' ? 'اختر الموظف:' : 'Select Employee:'}</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">اختر الموظف:</label>
                             <select onchange="selectedRecordTraineeId = this.value; renderCurrentView();" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none">
                                 ${matchingTrainees.map(tr => `<option value="${escAttr(tr.id)}" ${tr.id === emp.id ? 'selected' : ''}>[${tr.id}] ${tr.name} — ${tr.department}</option>`).join('')}
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 mb-1">${currentLang === 'ar' ? 'السنة التدريبية:' : 'Training Year:'}</label>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">السنة التدريبية:</label>
                             <select onchange="selectedRecordYear = this.value; renderCurrentView();" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none">
-                                <option value="all" ${selectedRecordYear === 'all' ? 'selected' : ''}>${currentLang === 'ar' ? 'جميع السنوات' : 'All Years'}</option>
+                                <option value="all" ${selectedRecordYear === 'all' ? 'selected' : ''}>جميع السنوات</option>
                                 ${availableYears.map(y => `<option value="${y}" ${selectedRecordYear === y ? 'selected' : ''}>${y}</option>`).join('')}
                             </select>
                         </div>
                     </div>
                     <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
                         <button onclick="exportEmployeeRecordExcel('${escAttr(emp.id)}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition">
-                            <i class="fa-solid fa-file-excel ml-1"></i> ${currentLang === 'ar' ? 'تصدير سجل الموظف Excel' : 'Export Employee Excel'}
+                            <i class="fa-solid fa-file-excel ml-1"></i> تصدير سجل الموظف Excel
                         </button>
                         <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition">
-                            <i class="fa-solid fa-print ml-1"></i> ${currentLang === 'ar' ? 'طباعة السجل PDF' : 'Print Record PDF'}
+                            <i class="fa-solid fa-print ml-1"></i> طباعة السجل PDF
                         </button>
                     </div>
                 </div>
@@ -2703,12 +3024,11 @@
                 const st = r.attendance[emp.id]?.status || 'مسجل';
                 sheet.addRow([c.name, r.batchName, getRoundInstructorsNames(r), r.startDate, c.hours, st]);
             });
-            const buffer = await workbook.xlsx.writeBuffer();
-            triggerExcelDownload(buffer, `Training_Record_${emp.id}.xlsx`);
+            triggerExcelDownload(await workbook.xlsx.writeBuffer(), `Training_Record_${emp.id}.xlsx`);
         }
 
         // =========================================================================
-        // 15. VIEW 9: REPORTS & CERTIFICATES
+        // 16. VIEW 9: REPORTS & CERTIFICATES
         // =========================================================================
         function renderReportsView() {
             if (appState.rounds.length === 0) return `<div class="bg-white p-8 rounded-2xl text-center text-slate-500">لا توجد بيانات للتقارير.</div>`;
@@ -2816,7 +3136,7 @@
         }
 
         // =========================================================================
-        // 16. INITIALIZATION ON PAGE LOAD
+        // 17. INITIALIZATION ON PAGE LOAD
         // =========================================================================
         window.addEventListener('DOMContentLoaded', () => {
             checkHrLoginGate();
