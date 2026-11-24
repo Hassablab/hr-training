@@ -1228,14 +1228,14 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm flex items-center justify-between">
                             <div>
-                                <p class="text-xs font-bold text-slate-500">${currentLang === 'ar' ? 'إجمالي الحركات المسجلة' : 'Total Logged Actions'}</p>
+                                <p class="text-xs font-bold text-slate-500">${currentLang === 'ar' ? 'إجمالي الحركات المسجلة' : 'Total Logged Events'}</p>
                                 <h3 class="text-2xl font-extrabold text-primary-950 mt-1">${logs.length}</h3>
                             </div>
                             <div class="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-lg"><i class="fa-solid fa-clock-rotate-left"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm flex items-center justify-between">
                             <div>
-                                <p class="text-xs font-bold text-slate-500">${currentLang === 'ar' ? 'حركات اليوم' : 'Today Activities'}</p>
+                                <p class="text-xs font-bold text-slate-500">${currentLang === 'ar' ? 'حركات اليوم' : 'Today Activity'}</p>
                                 <h3 class="text-2xl font-extrabold text-emerald-600 mt-1">${todayLogsCount}</h3>
                             </div>
                             <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-calendar-day"></i></div>
@@ -1245,91 +1245,67 @@
                                 <p class="text-xs font-bold text-slate-500">${currentLang === 'ar' ? 'عمليات الحذف المسجلة' : 'Deletion Events'}</p>
                                 <h3 class="text-2xl font-extrabold text-rose-600 mt-1">${deleteLogsCount}</h3>
                             </div>
-                            <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg"><i class="fa-solid fa-trash-can"></i></div>
                         </div>
                     </div>
 
-                    <!-- Filters & Export Bar -->
-                    <div class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm space-y-4">
-                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                            <div>
-                                <h3 class="font-extrabold text-lg text-primary-950 flex items-center gap-2">
-                                    <i class="fa-solid fa-list-check text-primary-600"></i> ${t('auditLogs')}
-                                </h3>
-                                <p class="text-xs text-slate-500">${t('auditLogsSub')}</p>
-                            </div>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="exportAuditLogsExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-file-excel"></i> ${t('downloadExcel')}
-                                </button>
-                                <button onclick="clearOldAuditLogs()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
-                                    <i class="fa-solid fa-broom"></i> ${currentLang === 'ar' ? 'تصفير السجل' : 'Clear Logs'}
-                                </button>
-                            </div>
+                    <!-- Filters & Actions -->
+                    <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex flex-wrap items-center gap-3 flex-1">
+                            <input type="text" value="${escAttr(logSearchQuery)}" oninput="logSearchQuery = this.value; renderCurrentView();" placeholder="${currentLang === 'ar' ? 'بحث باسم المستخدم أو تفاصيل الحركة...' : 'Search user or action details...'}" class="w-full sm:w-64 rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-primary-500">
+                            <select onchange="logFilterModule = this.value; renderCurrentView();" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-bold">
+                                <option value="all" ${logFilterModule === 'all' ? 'selected' : ''}>${currentLang === 'ar' ? 'جميع الشاشات' : 'All Screens'}</option>
+                                ${Object.keys(moduleLabels).map(k => `<option value="${k}" ${logFilterModule === k ? 'selected' : ''}>${moduleLabels[k]}</option>`).join('')}
+                            </select>
+                            <select onchange="logFilterAction = this.value; renderCurrentView();" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-bold">
+                                <option value="all" ${logFilterAction === 'all' ? 'selected' : ''}>${currentLang === 'ar' ? 'جميع أنواع العمليات' : 'All Action Types'}</option>
+                                ${Object.keys(actionMeta).map(k => `<option value="${k}" ${logFilterAction === k ? 'selected' : ''}>${currentLang === 'ar' ? actionMeta[k].ar : actionMeta[k].en}</option>`).join('')}
+                            </select>
                         </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">${t('search')}</label>
-                                <input type="text" value="${escAttr(logSearchQuery)}" oninput="logSearchQuery = this.value; renderCurrentView();" placeholder="${currentLang === 'ar' ? 'ابحث باسم المستخدم أو التفاصيل...' : 'Search by user or action details...'}" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-primary-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">${currentLang === 'ar' ? 'تصفية حسب الشاشة / القسم:' : 'Filter by Module:'}</label>
-                                <select onchange="logFilterModule = this.value; renderCurrentView();" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs font-bold outline-none">
-                                    <option value="all" ${logFilterModule === 'all' ? 'selected' : ''}>${currentLang === 'ar' ? 'جميع الشاشات والأقسام' : 'All Modules'}</option>
-                                    ${Object.keys(moduleLabels).map(k => `<option value="${k}" ${logFilterModule === k ? 'selected' : ''}>${moduleLabels[k]}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-500 mb-1">${currentLang === 'ar' ? 'نوع العملية:' : 'Action Type:'}</label>
-                                <select onchange="logFilterAction = this.value; renderCurrentView();" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs font-bold outline-none">
-                                    <option value="all" ${logFilterAction === 'all' ? 'selected' : ''}>${currentLang === 'ar' ? 'جميع العمليات' : 'All Action Types'}</option>
-                                    ${Object.keys(actionMeta).map(k => `<option value="${k}" ${logFilterAction === k ? 'selected' : ''}>${currentLang === 'ar' ? actionMeta[k].ar : actionMeta[k].en}</option>`).join('')}
-                                </select>
-                            </div>
+                        <div class="flex gap-2">
+                            <button onclick="exportAuditLogsExcel()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-excel"></i> ${t('downloadExcel')}
+                            </button>
+                            <button onclick="clearOldAuditLogs()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition">
+                                <i class="fa-solid fa-broom"></i> ${currentLang === 'ar' ? 'تفريغ السجل' : 'Clear Logs'}
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Logs Table -->
+                    <!-- Audit Logs Table -->
                     <div class="bg-white rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-start border-collapse">
                                 <thead>
                                     <tr class="bg-blue-50/70 text-primary-900 text-xs uppercase border-b border-blue-100">
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التاريخ والوقت' : 'Date & Time'}</th>
+                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التاريخ والوقت' : 'Timestamp'}</th>
                                         <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'المستخدم' : 'User'}</th>
                                         <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'نوع الحركة' : 'Action'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الشاشة' : 'Module'}</th>
-                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'تفاصيل العملية' : 'Operation Details'}</th>
+                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الشاشة' : 'Screen'}</th>
+                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'تفاصيل العملية' : 'Details'}</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-100 text-sm">
-                                    ${filteredLogs.length === 0 ? `<tr><td colspan="5" class="py-10 text-center text-slate-400 text-xs">${currentLang === 'ar' ? 'لا توجد سجلات مطابقة لمعايير البحث الحالية.' : 'No audit logs match the current filters.'}</td></tr>` : filteredLogs.map(log => {
-                                        const meta = actionMeta[log.actionType] || actionMeta.system;
-                                        const dt = new Date(log.timestamp);
-                                        const datePart = isNaN(dt) ? log.timestamp : dt.toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-GB');
-                                        const timePart = isNaN(dt) ? '' : dt.toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                <tbody class="divide-y divide-slate-100 text-xs">
+                                    ${filteredLogs.length === 0 ? `
+                                        <tr><td colspan="5" class="py-8 text-center text-slate-400">${currentLang === 'ar' ? 'لا توجد حركات مسجلة مطابقة للبحث.' : 'No matching log records found.'}</td></tr>
+                                    ` : filteredLogs.slice(0, 200).map(item => {
+                                        const meta = actionMeta[item.actionType] || actionMeta.system;
+                                        const dt = new Date(item.timestamp);
+                                        const formattedDate = isNaN(dt.getTime()) ? item.timestamp : dt.toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-GB');
                                         return `
-                                            <tr class="hover:bg-blue-50/30 transition">
-                                                <td class="py-3 px-4 text-xs whitespace-nowrap">
-                                                    <div class="font-bold text-slate-800">${datePart}</div>
-                                                    <div class="text-[11px] text-slate-400 font-mono" dir="ltr">${timePart}</div>
+                                            <tr class="hover:bg-blue-50/30">
+                                                <td class="py-3 px-4 font-mono text-slate-500 whitespace-nowrap" dir="ltr">${formattedDate}</td>
+                                                <td class="py-3 px-4">
+                                                    <div class="font-bold text-slate-800">${item.userName || '-'}</div>
+                                                    <div class="text-[11px] text-slate-400 font-mono">@${item.username || '-'}</div>
                                                 </td>
                                                 <td class="py-3 px-4">
-                                                    <div class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                                                        ${log.isAdmin ? '<i class="fa-solid fa-crown text-amber-500 text-[10px]"></i>' : ''}
-                                                        <span>${log.userName}</span>
-                                                    </div>
-                                                    <div class="text-[11px] text-primary-600 font-mono">@${log.username}</div>
-                                                </td>
-                                                <td class="py-3 px-4">
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${meta.cls}">
-                                                        <i class="fa-solid ${meta.icon}"></i>
-                                                        <span>${currentLang === 'ar' ? meta.ar : meta.en}</span>
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold ${meta.cls}">
+                                                        <i class="fa-solid ${meta.icon}"></i> ${currentLang === 'ar' ? meta.ar : meta.en}
                                                     </span>
                                                 </td>
-                                                <td class="py-3 px-4 text-xs font-bold text-slate-700">${moduleLabels[log.moduleKey] || log.moduleKey}</td>
-                                                <td class="py-3 px-4 text-xs text-slate-600 leading-relaxed">${currentLang === 'ar' ? log.detailsAr : (log.detailsEn || log.detailsAr)}</td>
+                                                <td class="py-3 px-4 font-semibold text-primary-800">${moduleLabels[item.moduleKey] || item.moduleKey}</td>
+                                                <td class="py-3 px-4 text-slate-700 font-medium">${currentLang === 'ar' ? item.detailsAr : item.detailsEn}</td>
                                             </tr>
                                         `;
                                     }).join('')}
@@ -1346,34 +1322,756 @@
             const workbook = new ExcelJS.Workbook();
             const sheet = workbook.addWorksheet('Audit_Logs');
             sheet.views = [{ rightToLeft: currentLang === 'ar' }];
-            sheet.columns = [
-                { header: currentLang === 'ar' ? 'التاريخ والوقت' : 'Timestamp', key: 'timestamp', width: 24 },
-                { header: currentLang === 'ar' ? 'المستخدم' : 'User', key: 'userName', width: 25 },
-                { header: currentLang === 'ar' ? 'اسم الحساب' : 'Username', key: 'username', width: 18 },
-                { header: currentLang === 'ar' ? 'نوع الحركة' : 'Action Type', key: 'actionType', width: 16 },
-                { header: currentLang === 'ar' ? 'الشاشة' : 'Module', key: 'moduleKey', width: 20 },
-                { header: currentLang === 'ar' ? 'التفاصيل' : 'Details', key: 'details', width: 50 }
-            ];
+            sheet.addRow(['Timestamp', 'User_Full_Name', 'Username', 'Action_Type', 'Screen', 'Details_AR', 'Details_EN']);
             (appState.auditLogs || []).forEach(l => {
-                sheet.addRow({
-                    timestamp: l.timestamp,
-                    userName: l.userName,
-                    username: l.username,
-                    actionType: l.actionType,
-                    moduleKey: l.moduleKey,
-                    details: currentLang === 'ar' ? l.detailsAr : l.detailsEn
-                });
+                sheet.addRow([l.timestamp, l.userName, l.username, l.actionType, l.moduleKey, l.detailsAr, l.detailsEn]);
             });
-            triggerExcelDownload(await workbook.xlsx.writeBuffer(), `Audit_Logs_${new Date().toISOString().slice(0,10)}.xlsx`);
-            showToast(currentLang === 'ar' ? 'تم تصدير سجل الحركات إلى Excel' : 'Audit logs exported to Excel', 'success');
+            triggerExcelDownload(await workbook.xlsx.writeBuffer(), `System_Audit_Logs_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            showToast(currentLang === 'ar' ? 'تم تصدير سجل الحركات إلى Excel' : 'Audit logs exported', 'success');
         }
 
         function clearOldAuditLogs() {
             if (!isSuperAdmin()) return;
             appState.auditLogs = [];
-            recordAuditLog('system', 'system', 'تم تصفير سجل الحركات التاريخية', 'Audit logs history was cleared');
+            recordAuditLog('system', 'system', 'تم تفريغ سجل الحركات التاريخية بواسطة الأدمن', 'Audit logs cleared by Admin');
             saveState();
-            showToast(currentLang === 'ar' ? 'تم تصفير السجل بنجاح' : 'Audit logs cleared', 'info');
+            showToast(currentLang === 'ar' ? 'تم تفريغ سجل الحركات' : 'Logs cleared', 'info');
+            renderCurrentView();
+        }
+
+        function deleteCourse(id) {
+            if (!requireEditPermission()) return;
+            if (appState.rounds.some(r => r.courseId === id)) {
+                showToast(currentLang === 'ar' ? 'لا يمكن حذف الدورة لارتباطها بدفعات تدريبية' : 'Cannot delete course linked to rounds', 'error');
+                return;
+            }
+            const target = getCourse(id);
+            appState.courses = appState.courses.filter(c => c.id !== id);
+            recordAuditLog('delete', 'courses', `حذف الدورة التدريبية: [${id}] ${target.name}`, `Deleted course: [${id}] ${target.name}`);
+            saveState();
+            showToast(currentLang === 'ar' ? 'تم حذف الدورة' : 'Course deleted', 'info');
+            renderCurrentView();
+        }
+
+        async function downloadCoursesExcelTemplate() {
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('Courses');
+            sheet.views = [{ rightToLeft: currentLang === 'ar' }];
+            sheet.addRow(['Course_Code', 'Course_Name', 'Category (Soft/Technical)', 'Hours', 'Cost', 'Description']);
+            appState.courses.forEach(c => {
+                sheet.addRow([c.id, c.name, c.category, c.hours, c.costPerRound || 0, c.description || '']);
+            });
+            triggerExcelDownload(await workbook.xlsx.writeBuffer(), 'Courses_Directory.xlsx');
+            showToast(currentLang === 'ar' ? 'تم تنزيل شيت الدورات' : 'Courses Excel downloaded', 'success');
+        }
+
+        async function handleCoursesExcelUpload(event) {
+            if (!requireEditPermission()) return;
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(await file.arrayBuffer());
+                const sheet = workbook.worksheets[0];
+                let count = 0;
+                sheet.eachRow((row, rowNumber) => {
+                    if (rowNumber === 1) return;
+                    const id = getCellText(row.getCell(1)) || ('CRS-' + (101 + appState.courses.length));
+                    const name = getCellText(row.getCell(2));
+                    if (!name) return;
+                    const rawCat = getCellText(row.getCell(3));
+                    const category = rawCat.toLowerCase().includes('tech') ? 'Technical' : 'Soft';
+                    const hours = Number(getCellText(row.getCell(4))) || 12;
+                    const costPerRound = Number(getCellText(row.getCell(5))) || 0;
+                    const description = getCellText(row.getCell(6));
+                    const existing = appState.courses.find(c => c.id === id);
+                    if (existing) {
+                        Object.assign(existing, { name, category, hours, costPerRound, description });
+                    } else {
+                        appState.courses.push({ id, name, category, hours, costPerRound, description });
+                    }
+                    count++;
+                });
+                recordAuditLog('import', 'courses', `استيراد ${count} دورة تدريبية من ملف Excel`, `Imported ${count} courses from Excel`);
+                saveState();
+                showToast(currentLang === 'ar' ? `تم استيراد ${count} دورة بنجاح` : `Imported ${count} courses`, 'success');
+                renderCurrentView();
+            } catch (e) {
+                showToast(currentLang === 'ar' ? 'خطأ في قراءة ملف الإكسل' : 'Error reading Excel file', 'error');
+            }
+        }
+
+        // =========================================================================
+        // 10. VIEW 3: INSTRUCTORS DEFINITION
+        // =========================================================================
+        function renderInstructorsView() {
+            const editable = canEditData();
+            return `
+                ${!editable ? `<div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i> ${t('viewOnlyNotice')}</div>` : ''}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    ${editable ? `
+                        <div class="bg-white p-6 rounded-2xl border border-blue-100 shadow-xs h-fit">
+                            <h3 class="font-bold text-lg text-primary-950 mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-user-tie text-primary-600"></i> ${currentLang === 'ar' ? 'إضافة محاضر جديد' : 'Add Instructor'}
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-5">${t('instructorsSub')}</p>
+                            <form onsubmit="handleAddInstructor(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${t('instructorName')} *</label>
+                                    <input type="text" id="inst-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'نوع التعاقد' : 'Type'}</label>
+                                        <select id="inst-type" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+                                            <option value="خارجي">${currentLang === 'ar' ? 'خارجي' : 'External'}</option>
+                                            <option value="داخلي">${currentLang === 'ar' ? 'داخلي' : 'Internal'}</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'التخصص' : 'Specialty'}</label>
+                                        <input type="text" id="inst-spec" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${t('whatsapp')}</label>
+                                    <input type="text" id="inst-phone" required dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الدورات التي يقدمها:' : 'Assigned Courses:'}</label>
+                                    <div class="max-h-32 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50">
+                                        ${appState.courses.map(c => `
+                                            <label class="flex items-center gap-2 p-1.5 rounded bg-white text-xs cursor-pointer">
+                                                <input type="checkbox" name="instCourses" value="${c.id}" class="rounded text-primary-600">
+                                                <span class="font-bold truncate">[${c.id}] ${c.name}</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-sm transition">
+                                    <i class="fa-solid fa-plus"></i> ${t('save')}
+                                </button>
+                            </form>
+                        </div>
+                    ` : ''}
+
+                    <div class="${editable ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-2xl border border-blue-100 shadow-xs overflow-hidden">
+                        <div class="p-6 border-b border-slate-100">
+                            <h3 class="font-bold text-lg text-primary-950">${t('instructors')} (${appState.instructors.length})</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-start border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-50/70 text-primary-900 text-xs uppercase border-b border-blue-100">
+                                        <th class="py-3.5 px-4 font-bold">${t('instructorName')}</th>
+                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'التخصص والنوع' : 'Specialty & Type'}</th>
+                                        <th class="py-3.5 px-4 font-bold">${currentLang === 'ar' ? 'الدورات المرتبطة' : 'Courses'}</th>
+                                        <th class="py-3.5 px-4 font-bold text-center">${t('actions')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm">
+                                    ${appState.instructors.map(ins => `
+                                        <tr class="hover:bg-blue-50/30">
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-bold text-slate-800">${ins.name}</div>
+                                                <div class="text-xs text-slate-400 font-mono" dir="ltr">${ins.phone || ''}</div>
+                                            </td>
+                                            <td class="py-3.5 px-4">
+                                                <div class="text-xs font-bold text-slate-700">${ins.specialty}</div>
+                                                <span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-primary-700 font-bold">${ins.type}</span>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-xs text-slate-600">
+                                                ${(ins.courseIds || []).map(cid => `<span class="inline-block bg-slate-100 px-2 py-0.5 rounded m-0.5 font-semibold">${getCourse(cid).name}</span>`).join('') || '-'}
+                                            </td>
+                                            <td class="py-3.5 px-4 text-center">
+                                                ${editable ? `
+                                                    <button onclick="openEditInstructorModal('${ins.id}')" class="text-primary-600 hover:bg-primary-50 p-2 rounded-lg" title="${t('edit')}"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                    <button onclick="deleteInstructor('${ins.id}')" class="text-rose-500 hover:bg-rose-50 p-2 rounded-lg" title="${t('delete')}"><i class="fa-solid fa-trash-can"></i></button>
+                                                ` : '-'}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleAddInstructor(e) {
+            e.preventDefault();
+            if (!requireEditPermission()) return;
+            const id = 'INS-' + String(Date.now()).slice(-4);
+            const name = document.getElementById('inst-name').value.trim();
+            const type = document.getElementById('inst-type').value;
+            const specialty = document.getElementById('inst-spec').value.trim();
+            const phone = document.getElementById('inst-phone').value.trim();
+            const courseIds = Array.from(document.querySelectorAll('input[name="instCourses"]:checked')).map(cb => cb.value);
+
+            appState.instructors.push({ id, name, type, specialty, phone, courseIds });
+            recordAuditLog('create', 'instructors', `إضافة محاضر جديد: ${name}`, `Added instructor: ${name}`);
+            saveState();
+            showToast(currentLang === 'ar' ? 'تم تسجيل المحاضر بنجاح' : 'Instructor added', 'success');
+            renderCurrentView();
+        }
+
+        function openEditInstructorModal(id) {
+            if (!requireEditPermission()) return;
+            const ins = getInstructor(id);
+            openGenericModal(`${t('edit')}: ${ins.name}`, `
+                <form onsubmit="saveEditedInstructor(event, '${ins.id}')" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold mb-1">${t('instructorName')}</label>
+                        <input type="text" id="edit-ins-name" required value="${escAttr(ins.name)}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">${currentLang === 'ar' ? 'النوع' : 'Type'}</label>
+                            <select id="edit-ins-type" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                <option value="خارجي" ${ins.type === 'خارجي' ? 'selected' : ''}>خارجي</option>
+                                <option value="داخلي" ${ins.type === 'داخلي' ? 'selected' : ''}>داخلي</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">${currentLang === 'ar' ? 'التخصص' : 'Specialty'}</label>
+                            <input type="text" id="edit-ins-spec" required value="${escAttr(ins.specialty)}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1">${t('whatsapp')}</label>
+                        <input type="text" id="edit-ins-phone" value="${escAttr(ins.phone || '')}" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1">${currentLang === 'ar' ? 'الدورات:' : 'Courses:'}</label>
+                        <div class="max-h-32 overflow-y-auto border border-slate-200 rounded-xl p-2 space-y-1 bg-slate-50">
+                            ${appState.courses.map(c => `
+                                <label class="flex items-center gap-2 p-1.5 rounded bg-white text-xs">
+                                    <input type="checkbox" name="editInstCourses" value="${c.id}" ${(ins.courseIds || []).includes(c.id) ? 'checked' : ''}>
+                                    <span class="font-bold">[${c.id}] ${c.name}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 bg-primary-600 text-white font-bold py-2.5 rounded-xl">${t('save')}</button>
+                        <button type="button" onclick="closeGenericModal()" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl">${t('cancel')}</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        function saveEditedInstructor(e, id) {
+            e.preventDefault();
+            if (!requireEditPermission()) return;
+            const ins = appState.instructors.find(x => x.id === id);
+            if (!ins) return;
+            ins.name = document.getElementById('edit-ins-name').value.trim();
+            ins.type = document.getElementById('edit-ins-type').value;
+            ins.specialty = document.getElementById('edit-ins-spec').value.trim();
+            ins.phone = document.getElementById('edit-ins-phone').value.trim();
+            ins.courseIds = Array.from(document.querySelectorAll('input[name="editInstCourses"]:checked')).map(cb => cb.value);
+            recordAuditLog('update', 'instructors', `تعديل بيانات المحاضر: ${ins.name}`, `Updated instructor: ${ins.name}`);
+            saveState();
+            closeGenericModal();
+            showToast(currentLang === 'ar' ? 'تم تحديث بيانات المحاضر' : 'Instructor updated', 'success');
+            renderCurrentView();
+        }
+
+        function deleteInstructor(id) {
+            if (!requireEditPermission()) return;
+            if (appState.rounds.some(r => (r.instructorIds || []).includes(id))) {
+                showToast(currentLang === 'ar' ? 'لا يمكن حذف المحاضر لارتباطه بدفعات' : 'Cannot delete instructor linked to rounds', 'error');
+                return;
+            }
+            const target = getInstructor(id);
+            appState.instructors = appState.instructors.filter(i => i.id !== id);
+            recordAuditLog('delete', 'instructors', `حذف المحاضر: ${target.name}`, `Deleted instructor: ${target.name}`);
+            saveState();
+            showToast(currentLang === 'ar' ? 'تم حذف المحاضر' : 'Instructor deleted', 'info');
+            renderCurrentView();
+        }
+
+        // =========================================================================
+        // 11. VIEW 4: TRAINEES DEFINITION
+        // =========================================================================
+        function renderTraineesView() {
+            const editable = canEditData();
+            const q = traineeSearchQuery.toLowerCase();
+            const filtered = appState.trainees.filter(tr =>
+                !q || tr.id.toLowerCase().includes(q) || tr.name.toLowerCase().includes(q) ||
+                (tr.department || '').toLowerCase().includes(q) || (tr.branch || '').toLowerCase().includes(q)
+            );
+
+            return `
+                ${!editable ? `<div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i> ${t('viewOnlyNotice')}</div>` : ''}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    ${editable ? `
+                        <div class="bg-white p-6 rounded-2xl border border-blue-100 shadow-xs h-fit">
+                            <h3 class="font-bold text-lg text-primary-950 mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-user-plus text-primary-600"></i> ${currentLang === 'ar' ? 'إضافة متدرب جديد' : 'Add Trainee'}
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-5">${t('traineesSub')}</p>
+                            <form onsubmit="handleAddTrainee(event)" class="space-y-3.5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${t('empCode')} *</label>
+                                    <input type="text" id="trn-id" required value="EMP-${201 + appState.trainees.length}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${t('empName')} *</label>
+                                    <input type="text" id="trn-name" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('jobTitle')} *</label>
+                                        <input type="text" id="trn-title" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('department')} *</label>
+                                        <input type="text" id="trn-dept" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('branch')} *</label>
+                                        <input type="text" id="trn-branch" required value="الفرع الرئيسي" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('whatsapp')}</label>
+                                        <input type="text" id="trn-phone" dir="ltr" placeholder="2010xxxxxxxx" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-sm transition">
+                                    <i class="fa-solid fa-plus"></i> ${t('save')}
+                                </button>
+                            </form>
+                        </div>
+                    ` : ''}
+
+                    <div class="${editable ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-2xl border border-blue-100 shadow-xs overflow-hidden">
+                        <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <h3 class="font-bold text-lg text-primary-950">${t('trainees')} (${appState.trainees.length})</h3>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="downloadTraineesExcelTemplate()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-excel"></i> ${t('downloadExcel')}
+                                </button>
+                                ${editable ? `
+                                    <button onclick="document.getElementById('trainees-excel-input').click()" class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                                        <i class="fa-solid fa-upload"></i> ${t('uploadExcel')}
+                                    </button>
+                                    <input type="file" id="trainees-excel-input" accept=".xlsx" onchange="handleTraineesExcelUpload(event)" class="hidden">
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="p-4 bg-slate-50 border-b border-slate-100">
+                            <input type="text" value="${escAttr(traineeSearchQuery)}" oninput="traineeSearchQuery = this.value; renderCurrentView();" placeholder="${t('search')}" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-start border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-50/70 text-primary-900 text-xs uppercase border-b border-blue-100">
+                                        <th class="py-3 px-4 font-bold">${t('empCode')}</th>
+                                        <th class="py-3 px-4 font-bold">${t('empName')}</th>
+                                        <th class="py-3 px-4 font-bold">${t('jobTitle')} / ${t('department')}</th>
+                                        <th class="py-3 px-4 font-bold">${t('branch')}</th>
+                                        <th class="py-3 px-4 font-bold text-center">${t('actions')}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm">
+                                    ${filtered.map(tr => `
+                                        <tr class="hover:bg-blue-50/30">
+                                            <td class="py-3 px-4 font-mono text-xs font-bold text-primary-600">${tr.id}</td>
+                                            <td class="py-3 px-4">
+                                                <div class="font-bold text-slate-800">${tr.name}</div>
+                                                <div class="text-[11px] text-emerald-700 font-mono" dir="ltr">${tr.phone || ''}</div>
+                                            </td>
+                                            <td class="py-3 px-4 text-xs">
+                                                <div class="font-bold text-slate-700">${tr.jobTitle}</div>
+                                                <div class="text-slate-400">${tr.department}</div>
+                                            </td>
+                                            <td class="py-3 px-4 text-xs text-slate-600">${tr.branch || '-'}</td>
+                                            <td class="py-3 px-4 text-center">
+                                                ${editable ? `
+                                                    <button onclick="openEditTraineeModal('${tr.id}')" class="text-primary-600 hover:bg-primary-50 p-2 rounded-lg" title="${t('edit')}"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                    <button onclick="deleteTrainee('${tr.id}')" class="text-rose-500 hover:bg-rose-50 p-2 rounded-lg" title="${t('delete')}"><i class="fa-solid fa-trash-can"></i></button>
+                                                ` : '-'}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleAddTrainee(e) {
+            e.preventDefault();
+            if (!requireEditPermission()) return;
+            const id = document.getElementById('trn-id').value.trim();
+            const name = document.getElementById('trn-name').value.trim();
+            const jobTitle = document.getElementById('trn-title').value.trim();
+            const department = document.getElementById('trn-dept').value.trim();
+            const branch = document.getElementById('trn-branch').value.trim();
+            const phone = document.getElementById('trn-phone').value.trim();
+
+            if (appState.trainees.some(tr => tr.id === id)) {
+                showToast(currentLang === 'ar' ? 'كود الموظف مسجل مسبقاً' : 'Employee code already exists', 'error');
+                return;
+            }
+            appState.trainees.push({ id, name, jobTitle, department, branch, phone });
+            recordAuditLog('create', 'trainees', `إضافة متدرب جديد: [${id}] ${name}`, `Added trainee: [${id}] ${name}`);
+            saveState();
+            showToast(currentLang === 'ar' ? 'تمت إضافة المتدرب بنجاح' : 'Trainee added', 'success');
+            renderCurrentView();
+        }
+
+        function openEditTraineeModal(id) {
+            if (!requireEditPermission()) return;
+            const tr = getTrainee(id);
+            openGenericModal(`${t('edit')}: ${tr.name}`, `
+                <form onsubmit="saveEditedTrainee(event, '${tr.id}')" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold mb-1">${t('empName')}</label>
+                        <input type="text" id="edit-tr-name" required value="${escAttr(tr.name)}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">${t('jobTitle')}</label>
+                            <input type="text" id="edit-tr-title" required value="${escAttr(tr.jobTitle)}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">${t('department')}</label>
+                            <input type="text" id="edit-tr-dept" required value="${escAttr(tr.department)}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">${t('branch')}</label>
+                            <input type="text" id="edit-tr-branch" value="${escAttr(tr.branch || '')}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">${t('whatsapp')}</label>
+                            <input type="text" id="edit-tr-phone" value="${escAttr(tr.phone || '')}" dir="ltr" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 bg-primary-600 text-white font-bold py-2.5 rounded-xl">${t('save')}</button>
+                        <button type="button" onclick="closeGenericModal()" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl">${t('cancel')}</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        function saveEditedTrainee(e, id) {
+            e.preventDefault();
+            if (!requireEditPermission()) return;
+            const tr = appState.trainees.find(x => x.id === id);
+            if (!tr) return;
+            tr.name = document.getElementById('edit-tr-name').value.trim();
+            tr.jobTitle = document.getElementById('edit-tr-title').value.trim();
+            tr.department = document.getElementById('edit-tr-dept').value.trim();
+            tr.branch = document.getElementById('edit-tr-branch').value.trim();
+            tr.phone = document.getElementById('edit-tr-phone').value.trim();
+            recordAuditLog('update', 'trainees', `تعديل بيانات المتدرب: [${tr.id}] ${tr.name}`, `Updated trainee: [${tr.id}] ${tr.name}`);
+            saveState();
+            closeGenericModal();
+            showToast(currentLang === 'ar' ? 'تم تحديث بيانات المتدرب' : 'Trainee updated', 'success');
+            renderCurrentView();
+        }
+
+        function deleteTrainee(id) {
+            if (!requireEditPermission()) return;
+            const target = getTrainee(id);
+            appState.trainees = appState.trainees.filter(tr => tr.id !== id);
+            recordAuditLog('delete', 'trainees', `حذف المتدرب: [${id}] ${target.name}`, `Deleted trainee: [${id}] ${target.name}`);
+            saveState();
+            showToast(currentLang === 'ar' ? 'تم حذف المتدرب' : 'Trainee deleted', 'info');
+            renderCurrentView();
+        }
+
+        async function downloadTraineesExcelTemplate() {
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('Trainees');
+            sheet.views = [{ rightToLeft: currentLang === 'ar' }];
+            sheet.addRow(['Emp_Code', 'Full_Name', 'Job_Title', 'Department', 'Branch', 'WhatsApp']);
+            appState.trainees.forEach(tr => {
+                sheet.addRow([tr.id, tr.name, tr.jobTitle, tr.department, tr.branch || '', tr.phone || '']);
+            });
+            triggerExcelDownload(await workbook.xlsx.writeBuffer(), 'Trainees_List.xlsx');
+            showToast(currentLang === 'ar' ? 'تم تنزيل شيت المتدربين' : 'Trainees Excel downloaded', 'success');
+        }
+
+        async function handleTraineesExcelUpload(event) {
+            if (!requireEditPermission()) return;
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(await file.arrayBuffer());
+                const sheet = workbook.worksheets[0];
+                let count = 0;
+                sheet.eachRow((row, rowNumber) => {
+                    if (rowNumber === 1) return;
+                    const id = getCellText(row.getCell(1)) || ('EMP-' + (201 + appState.trainees.length));
+                    const name = getCellText(row.getCell(2));
+                    if (!name) return;
+                    const jobTitle = getCellText(row.getCell(3)) || '-';
+                    const department = getCellText(row.getCell(4)) || '-';
+                    const branch = getCellText(row.getCell(5)) || 'الفرع الرئيسي';
+                    const phone = getCellText(row.getCell(6));
+                    const existing = appState.trainees.find(tr => tr.id === id);
+                    if (existing) {
+                        Object.assign(existing, { name, jobTitle, department, branch, phone });
+                    } else {
+                        appState.trainees.push({ id, name, jobTitle, department, branch, phone });
+                    }
+                    count++;
+                });
+                recordAuditLog('import', 'trainees', `استيراد ${count} متدرب من ملف Excel`, `Imported ${count} trainees from Excel`);
+                saveState();
+                showToast(currentLang === 'ar' ? `تم استيراد ${count} متدرب بنجاح` : `Imported ${count} trainees`, 'success');
+                renderCurrentView();
+            } catch (e) {
+                showToast(currentLang === 'ar' ? 'خطأ في قراءة ملف الإكسل' : 'Error reading Excel file', 'error');
+            }
+        }
+
+        // =========================================================================
+        // 12. VIEW 5: COURSE SETUP / TRAINING ROUNDS
+        // =========================================================================
+        function renderRoundsView() {
+            const editable = canEditData();
+            return `
+                ${!editable ? `<div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i> ${t('viewOnlyNotice')}</div>` : ''}
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    ${editable ? `
+                        <div class="xl:col-span-5 bg-white p-6 rounded-2xl border border-blue-100 shadow-xs h-fit space-y-4">
+                            <div>
+                                <h3 class="font-bold text-lg text-primary-950 flex items-center gap-2">
+                                    <i class="fa-solid fa-sliders text-primary-600"></i> ${currentLang === 'ar' ? 'إعداد دفعة تدريبية جديدة' : 'Create Training Batch'}
+                                </h3>
+                                <p class="text-xs text-slate-500 mt-1">${t('roundsSub')}</p>
+                            </div>
+                            <form onsubmit="handleCreateRound(event)" class="space-y-3.5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${t('courseName')} *</label>
+                                    <select id="round-course-id" required class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-bold">
+                                        <option value="">-- ${currentLang === 'ar' ? 'اختر الدورة' : 'Select Course'} --</option>
+                                        ${appState.courses.map(c => `<option value="${c.id}">[${c.id}] ${c.name} (${c.hours}h)</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'مسمى الدفعة' : 'Batch Name'} *</label>
+                                    <input type="text" id="round-batch-name" required placeholder="${currentLang === 'ar' ? 'مثال: الدفعة الأولى - 2026' : 'e.g. Batch 1 - 2026'}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${t('instructorName')} *</label>
+                                    <div class="max-h-28 overflow-y-auto border border-slate-300 rounded-xl p-2 space-y-1 bg-slate-50">
+                                        ${appState.instructors.map(ins => `
+                                            <label class="flex items-center gap-2 p-1.5 rounded bg-white text-xs cursor-pointer">
+                                                <input type="checkbox" name="roundInstructors" value="${ins.id}" class="rounded text-primary-600">
+                                                <span class="font-bold">${ins.name}</span> <span class="text-slate-400">(${ins.specialty})</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('startDate')}</label>
+                                        <input type="date" id="round-start" required value="${new Date().toISOString().slice(0,10)}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('endDate')}</label>
+                                        <input type="date" id="round-end" required value="${new Date().toISOString().slice(0,10)}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">${t('location')}</label>
+                                    <input type="text" id="round-location" value="قاعة التدريب الرئيسية" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="text-xs font-bold text-slate-700">${t('trainees')} *</label>
+                                        <button type="button" onclick="toggleAllTraineesSelect()" class="text-xs text-primary-600 font-bold hover:underline">${currentLang === 'ar' ? 'تحديد الكل' : 'Select All'}</button>
+                                    </div>
+                                    <div class="max-h-36 overflow-y-auto border border-slate-300 rounded-xl p-2 space-y-1 bg-slate-50">
+                                        ${appState.trainees.map(tr => `
+                                            <label class="flex items-center gap-2 p-1.5 rounded bg-white text-xs cursor-pointer">
+                                                <input type="checkbox" name="roundTrainees" value="${tr.id}" class="round-trainee-cb rounded text-primary-600">
+                                                <span class="font-bold">[${tr.id}] ${tr.name}</span> <span class="text-slate-400">(${tr.department})</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl shadow-sm transition">
+                                    <i class="fa-solid fa-calendar-check"></i> ${t('save')}
+                                </button>
+                            </form>
+                        </div>
+                    ` : ''}
+
+                    <div class="${editable ? 'xl:col-span-7' : 'xl:col-span-12'} space-y-4">
+                        <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-xs flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <h3 class="font-bold text-lg text-primary-950">${t('rounds')} (${appState.rounds.length})</h3>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="downloadCourseMatrixExcel()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-table-cells"></i> ${currentLang === 'ar' ? 'تنزيل شيت المصفوفة' : 'Download Matrix'}
+                                </button>
+                                ${editable ? `
+                                    <button onclick="document.getElementById('matrix-excel-input').click()" class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                                        <i class="fa-solid fa-upload"></i> ${currentLang === 'ar' ? 'رفع شيت المصفوفة' : 'Upload Matrix'}
+                                    </button>
+                                    <input type="file" id="matrix-excel-input" accept=".xlsx" onchange="handleMatrixExcelUpload(event)" class="hidden">
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        ${appState.rounds.map(r => {
+                            const c = getCourse(r.courseId);
+                            const instNames = (r.instructorIds || []).map(id => getInstructor(id).name).join(' ، ');
+                            const st = calcRoundStats(r);
+                            return `
+                                <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-xs space-y-3">
+                                    <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-3">
+                                        <div>
+                                            <span class="text-xs font-mono text-primary-600 font-bold">${r.id}</span>
+                                            <h4 class="font-extrabold text-base text-primary-950">${c.name}</h4>
+                                            <p class="text-xs text-slate-500">${r.batchName}</p>
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <button onclick="selectedRoundForAttendance = '${r.id}'; navigate('attendance');" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg">${t('attendance')} (${st.present}/${st.total})</button>
+                                            ${editable ? `
+                                                <button onclick="openEditRoundModal('${r.id}')" class="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg" title="${t('edit')}"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                <button onclick="deleteRound('${r.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg" title="${t('delete')}"><i class="fa-solid fa-trash-can"></i></button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                                        <div><span class="text-slate-400 block">${t('instructorName')}</span><strong>${instNames || '-'}</strong></div>
+                                        <div><span class="text-slate-400 block">${t('startDate')}</span><strong>${r.startDate} ➔ ${r.endDate}</strong></div>
+                                        <div><span class="text-slate-400 block">${t('location')}</span><strong>${r.location}</strong></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleAllTraineesSelect() {
+            const cbs = document.querySelectorAll('.round-trainee-cb');
+            const allChecked = Array.from(cbs).every(cb => cb.checked);
+            cbs.forEach(cb => cb.checked = !allChecked);
+        }
+
+        function handleCreateRound(e) {
+            e.preventDefault();
+            if (!requireEditPermission()) return;
+            const courseId = document.getElementById('round-course-id').value;
+            const batchName = document.getElementById('round-batch-name').value.trim();
+            const instructorIds = Array.from(document.querySelectorAll('input[name="roundInstructors"]:checked')).map(cb => cb.value);
+            const startDate = document.getElementById('round-start').value;
+            const endDate = document.getElementById('round-end').value;
+            const location = document.getElementById('round-location').value.trim();
+            const traineeIds = Array.from(document.querySelectorAll('.round-trainee-cb:checked')).map(cb => cb.value);
+
+            if (instructorIds.length === 0) {
+                showToast(currentLang === 'ar' ? 'اختر محاضراً واحداً على الأقل' : 'Select at least one instructor', 'error');
+                return;
+            }
+            if (traineeIds.length === 0) {
+                showToast(currentLang === 'ar' ? 'اختر متدرباً واحداً على الأقل' : 'Select at least one trainee', 'error');
+                return;
+            }
+
+            const newRound = {
+                id: 'RND-' + new Date().getFullYear() + '-' + String(appState.rounds.length + 1).padStart(2, '0'),
+                batchName, courseId, instructorIds, startDate, endDate, location,
+                status: 'قيد التنفيذ', traineeIds, attendance: {}, evaluations: []
+            };
+            appState.rounds.unshift(newRound);
+            recordAuditLog('create', 'rounds', `إنشاء دفعة تدريبية: ${getCourse(courseId).name} (${batchName})`, `Created round: ${getCourse(courseId).name} (${batchName})`);
+            saveState();
+            showToast(currentLang === 'ar' ? 'تم اعتماد الدفعة التدريبية بنجاح' : 'Training round created', 'success');
+            renderCurrentView();
+        }
+
+        function openEditRoundModal(id) {
+            if (!requireEditPermission()) return;
+            const r = appState.rounds.find(x => x.id === id);
+            if (!r) return;
+            openGenericModal(`${t('edit')}: ${getCourse(r.courseId).name}`, `
+                <form onsubmit="saveEditedRound(event, '${r.id}')" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">${t('courseName')}</label>
+                            <select id="edit-rnd-course" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                                ${appState.courses.map(c => `<option value="${c.id}" ${c.id === r.courseId ? 'selected' : ''}>${c.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الدفعة' : 'Batch'}</label>
+                            <input type="text" id="edit-rnd-batch-name" required value="${escAttr(r.batchName)}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('instructorName')}</label>
+                        <div class="max-h-28 overflow-y-auto border border-slate-300 rounded-xl p-2 space-y-1 bg-slate-50">
+                            ${appState.instructors.map(ins => `
+                                <label class="flex items-center gap-2 p-1 rounded bg-white text-xs">
+                                    <input type="checkbox" name="editRoundInstructors" value="${ins.id}" ${(r.instructorIds || []).includes(ins.id) ? 'checked' : ''}>
+                                    <span class="font-bold">${ins.name}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div><label class="block text-xs font-bold mb-1">${t('startDate')}</label><input type="date" id="edit-rnd-start" value="${r.startDate}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs"></div>
+                        <div><label class="block text-xs font-bold mb-1">${t('endDate')}</label><input type="date" id="edit-rnd-end" value="${r.endDate}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs"></div>
+                        <div><label class="block text-xs font-bold mb-1">${t('location')}</label><input type="text" id="edit-rnd-location" value="${escAttr(r.location)}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('trainees')}</label>
+                        <div class="max-h-36 overflow-y-auto border border-slate-300 rounded-xl p-2 space-y-1 bg-slate-50">
+                            ${appState.trainees.map(tr => `
+                                <label class="flex items-center gap-2 p-1 rounded bg-white text-xs">
+                                    <input type="checkbox" name="editRoundTrainees" value="${tr.id}" ${r.traineeIds.includes(tr.id) ? 'checked' : ''}>
+                                    <span class="font-bold">[${tr.id}] ${tr.name}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 bg-primary-600 text-white font-bold py-2.5 rounded-xl">${t('save')}</button>
+                        <button type="button" onclick="closeGenericModal()" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl">${t('cancel')}</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        function saveEditedRound(e, id) {
+            e.preventDefault();
+            if (!requireEditPermission()) return;
+            const r = appState.rounds.find(x => x.id === id);
+            if (!r) return;
+            r.courseId = document.getElementById('edit-rnd-course').value;
+            r.batchName = document.getElementById('edit-rnd-batch-name').value.trim();
+            r.instructorIds = Array.from(document.querySelectorAll('input[name="editRoundInstructors"]:checked')).map(cb => cb.value);
+            r.startDate = document.getElementById('edit-rnd-start').value;
+            r.endDate = document.getElementById('edit-rnd-end').value;
+            r.location = document.getElementById('edit-rnd-location').value.trim();
+            r.traineeIds = Array.from(document.querySelectorAll('input[name="editRoundTrainees"]:checked')).map(cb => cb.value);
+            recordAuditLog('update', 'rounds', `تعديل الدفعة التدريبية: ${getCourse(r.courseId).name} (${r.batchName})`, `Updated round: ${getCourse(r.courseId).name} (${r.batchName})`);
+            saveState();
+            closeGenericModal();
+            showToast(currentLang === 'ar' ? 'تم تحديث الدفعة بنجاح' : 'Round updated', 'success');
             renderCurrentView();
         }
 
@@ -2194,36 +2892,17 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الدفعة' : 'Batch'}</label>
-                            <input type="text" id="edit-rnd-batch-name" required value="${escAttr(r.batchName)}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">${t('hours')}</label>
+                            <input type="number" id="edit-c-hours" required min="1" value="${c.hours}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('instructorName')}</label>
-                        <div class="max-h-28 overflow-y-auto border border-slate-300 rounded-xl p-2 space-y-1 bg-slate-50">
-                            ${appState.instructors.map(ins => `
-                                <label class="flex items-center gap-2 p-1 rounded bg-white text-xs">
-                                    <input type="checkbox" name="editRoundInstructors" value="${ins.id}" ${(r.instructorIds || []).includes(ins.id) ? 'checked' : ''}>
-                                    <span class="font-bold">${ins.name}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div><label class="block text-xs font-bold mb-1">${t('startDate')}</label><input type="date" id="edit-rnd-start" value="${r.startDate}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs"></div>
-                        <div><label class="block text-xs font-bold mb-1">${t('endDate')}</label><input type="date" id="edit-rnd-end" value="${r.endDate}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs"></div>
-                        <div><label class="block text-xs font-bold mb-1">${t('location')}</label><input type="text" id="edit-rnd-location" value="${escAttr(r.location)}" class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs"></div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'التكلفة' : 'Cost'}</label>
+                        <input type="number" id="edit-c-cost" min="0" value="${c.costPerRound || 0}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">${t('trainees')}</label>
-                        <div class="max-h-36 overflow-y-auto border border-slate-300 rounded-xl p-2 space-y-1 bg-slate-50">
-                            ${appState.trainees.map(tr => `
-                                <label class="flex items-center gap-2 p-1 rounded bg-white text-xs">
-                                    <input type="checkbox" name="editRoundTrainees" value="${tr.id}" ${r.traineeIds.includes(tr.id) ? 'checked' : ''}>
-                                    <span class="font-bold">[${tr.id}] ${tr.name}</span>
-                                </label>
-                            `).join('')}
-                        </div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">${currentLang === 'ar' ? 'الوصف' : 'Description'}</label>
+                        <textarea id="edit-c-desc" rows="2" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm">${escAttr(c.description || '')}</textarea>
                     </div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" class="flex-1 bg-primary-600 text-white font-bold py-2.5 rounded-xl">${t('save')}</button>
@@ -2233,15 +2912,34 @@
             `);
         }
 
-        function deleteRound(id) {
+        function saveEditedCourse(e, id) {
+            e.preventDefault();
             if (!requireEditPermission()) return;
-            const target = appState.rounds.find(r => r.id === id);
-            appState.rounds = appState.rounds.filter(r => r.id !== id);
-            if (target) {
-                recordAuditLog('delete', 'rounds', `حذف الدفعة التدريبية: ${getCourse(target.courseId).name} (${target.batchName})`, `Deleted round: ${getCourse(target.courseId).name} (${target.batchName})`);
-            }
+            const c = appState.courses.find(x => x.id === id);
+            if (!c) return;
+            c.name = document.getElementById('edit-c-name').value.trim();
+            c.category = document.getElementById('edit-c-cat').value;
+            c.hours = Number(document.getElementById('edit-c-hours').value);
+            c.costPerRound = Number(document.getElementById('edit-c-cost').value);
+            c.description = document.getElementById('edit-c-desc').value.trim();
+            recordAuditLog('update', 'courses', `تعديل بيانات الدورة: [${c.id}] ${c.name}`, `Updated course: [${c.id}] ${c.name}`);
             saveState();
-            showToast(currentLang === 'ar' ? 'تم حذف الدفعة' : 'Round deleted', 'info');
+            closeGenericModal();
+            showToast(currentLang === 'ar' ? 'تم تحديث بيانات الدورة' : 'Course updated', 'success');
+            renderCurrentView();
+        }
+
+        function deleteCourse(id) {
+            if (!requireEditPermission()) return;
+            if (appState.rounds.some(r => r.courseId === id)) {
+                showToast(currentLang === 'ar' ? 'لا يمكن حذف الدورة لارتباطها بدفعات تدريبية' : 'Cannot delete course linked to rounds', 'error');
+                return;
+            }
+            const target = getCourse(id);
+            appState.courses = appState.courses.filter(c => c.id !== id);
+            recordAuditLog('delete', 'courses', `حذف الدورة التدريبية: [${id}] ${target.name}`, `Deleted course: [${id}] ${target.name}`);
+            saveState();
+            showToast(currentLang === 'ar' ? 'تم حذف الدورة' : 'Course deleted', 'info');
             renderCurrentView();
         }
 
